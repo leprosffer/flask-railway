@@ -1,0 +1,7 @@
+{
+  "nom": "string",
+  "prenom": "string",
+  "genre": "string",
+  "adresse_mail": "email",
+  "mot_de_passe": "password"
+}

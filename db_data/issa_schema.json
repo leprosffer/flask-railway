@@ -1,0 +1,5 @@
+{
+  "NOM": "string",
+  "AGE": "int",
+  "PRENOM": "string"
+}

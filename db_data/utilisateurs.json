@@ -1,0 +1,10 @@
+[
+  {
+    "nom": "tanjiro",
+    "prenom": "kamado",
+    "genre": "Homme",
+    "email": "tanjiro@gamil.com",
+    "mot_de_passe": "1234567890",
+    "budget": 0.0
+  }
+]
