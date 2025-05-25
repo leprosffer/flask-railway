@@ -201,79 +201,56 @@ def admin_dashboard():
     active_table = session_manager.get_active_table()
 
     return render_template_string("""
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background: #f8f9fa;
-                padding: 40px;
-                text-align: center;
-            }
-
-            table {
-                margin: auto;
-                border-collapse: collapse;
-                width: 80%;
-                background: white;
-                box-shadow: 0 0 8px rgba(0,0,0,0.1);
-            }
-
-            th, td {
-                padding: 12px;
-                border: 1px solid #ddd;
-            }
-
-            th {
-                background-color: #007bff;
-                color: white;
-            }
-
-            a {
-                color: #007bff;
-                text-decoration: none;
-            }
-
-            a:hover {
-                text-decoration: underline;
-            }
-
-            .admin-actions {
-                margin-top: 20px;
-            }
-
-            .admin-actions a {
-                display: inline-block;
-                margin: 10px;
-                padding: 10px 15px;
-                background: #e9ecef;
-                border-radius: 4px;
-            }
-        </style>
-
-        <h2>🧑‍💼 Panneau d'administration</h2>
-        <p>Table active : <strong>{{ active_table }}</strong></p>
-
-        <h3>Tables existantes :</h3>
-        <table>
-            <tr>
-                <th>Nom de la table</th>
-                <th>Actions</th>
-            </tr>
-            {% for table in tables %}
-            <tr>
-                <td>{{ table }}</td>
-                <td>
-                    [<a href="{{ url_for('admin_set_table', name=table) }}">Utiliser</a>] |
-                    [<a href="{{ url_for('admin_view_data') }}?table={{ table }}">Voir données</a>]
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        <div class="admin-actions">
-            <p>📝 <a href="{{ url_for('admin_add_user') }}">Ajouter un utilisateur (via formulaire)</a></p>
-            <p>🔒 <a href="{{ url_for('admin_logout') }}">Déconnexion</a></p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Panneau d'administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <h2>🧑‍💼 Panneau d'administration</h2>
+            <p>Table active : <strong>{{ active_table }}</strong></p>
         </div>
-    """, tables=tables, active_table=active_table)
+
+        <div class="table-responsive">
+            <h3>Tables existantes :</h3>
+            <table class="table table-bordered table-hover bg-white shadow-sm">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Nom de la table</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for table in tables %}
+                    <tr>
+                        <td>{{ table }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_set_table', name=table) }}" class="btn btn-sm btn-outline-primary">Utiliser</a>
+                            <a href="{{ url_for('admin_view_data') }}?table={{ table }}" class="btn btn-sm btn-outline-secondary">Voir données</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('admin_add_user') }}" class="btn btn-info mb-2">📝 Ajouter un utilisateur (via formulaire)</a><br>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">🔒 Déconnexion</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""", tables=tables, active_table=active_table)
 
     if schema_manager.load_schema(table):
         session_manager.set_active_table(table)
