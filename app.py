@@ -567,7 +567,6 @@ def login():
         email = request.form.get('email')
         mot_de_passe = request.form.get('mot_de_passe')
 
-        # Recherche dans la table utilisateurs
         table = "utilisateurs"
         utilisateurs = file_manager.load_data(table)
 
@@ -579,88 +578,42 @@ def login():
         return "❌ Identifiants incorrects."
 
     return render_template_string("""
-        <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 40px;
-        text-align: center;
-    }
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
+            <h2 class="text-center mb-4">🔐 Connexion utilisateur</h2>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Adresse email</label>
+                    <input name="email" type="email" class="form-control" id="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                    <input name="mot_de_passe" type="password" class="form-control" id="mot_de_passe" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+            </form>
+            <p class="text-center mt-3">
+                Pas encore inscrit ?
+                <a href="{{ url_for('formulaire') }}">Créer un compte</a>
+            </p>
+        </div>
+    </div>
 
-    h2 {
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    form {
-        display: inline-block;
-        text-align: left;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        min-width: 320px;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    select {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    input[type="submit"] {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    input[type="submit"]:hover {
-        background: #0056b3;
-    }
-
-    p {
-        margin-top: 15px;
-    }
-
-    a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    .logout {
-        margin-top: 30px;
-        display: inline-block;
-    }
-
-    .logout a {
-        color: #ff6600;
-    }
-</style>
-        <h2>Connexion utilisateur</h2>
-        <form method="POST">
-            Email : <input name="email" type="email"><br>
-            Mot de passe : <input name="mot_de_passe" type="password"><br>
-            <input type="submit" value="Se connecter">
-        </form>
-        <p>Pas encore inscrit ? <a href="{{ url_for('formulaire') }}">Créer un compte</a></p>
-    """)
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""")
 
 
 
@@ -691,98 +644,38 @@ def mon_espace():
         return redirect(url_for('mon_espace'))
 
     return render_template_string("""
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon espace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px;">
+            <h2 class="text-center mb-4">Bienvenue {{ utilisateur["prenom"] }} 👋</h2>
+            <p class="text-center">Budget actuel : <strong>{{ utilisateur.get("budget", "Non défini") }}</strong></p>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="budget" class="form-label"><strong>Votre budget total :</strong></label>
+                    <input id="budget" name="budget" type="number" step="0.01" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Enregistrer le budget</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('logout') }}" class="btn btn-link text-danger">🔓 Se déconnecter</a>
+            </div>
+        </div>
+    </div>
 
-       <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 40px;
-        text-align: center;
-    }
-
-    h2 {
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    form {
-        display: inline-block;
-        text-align: left;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        min-width: 320px;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    select {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    input[type="submit"] {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    input[type="submit"]:hover {
-        background: #0056b3;
-    }
-
-    p {
-        margin-top: 15px;
-    }
-
-    a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    .logout {
-        margin-top: 30px;
-        display: inline-block;
-    }
-
-    .logout a {
-        color: #ff6600;
-    }
-
-    input[name="budget"] {
-    font-size: 1.2rem;
-    padding: 14px;
-    border: 2px solid #007bff;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-</style>
-
-        <h2>Bienvenue {{ utilisateur["prenom"] }} 👋</h2>
-        <p>Budget actuel : {{ utilisateur.get("budget", "Non défini") }}</p>
-        <form method="POST">
-            <label for="budget"><strong>Votre budget total :</strong></label> : <input id="budget" name="budget" type="number" step="0.01">
-            <input type="submit" value="Enregistrer le budget">
-        </form>
-        <p><a href="{{ url_for('logout') }}">🔓 Se déconnecter</a></p>
-    """, utilisateur=utilisateur)
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""", utilisateur=utilisateur)
 
 
 
