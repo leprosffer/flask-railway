@@ -396,15 +396,36 @@ def admin_add_user():
         return redirect(url_for('admin_view_data'))
 
     return render_template_string("""
-        <h2>Ajouter un utilisateur à '{{ table }}'</h2>
-        <form method="POST">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter un utilisateur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">➕ Ajouter un utilisateur à <strong>{{ table }}</strong></h2>
+
+        <form method="POST" class="bg-white p-4 rounded shadow-sm">
             {% for champ in schema %}
-                {{ champ }} : <input name="{{ champ }}"><br>
+                <div class="mb-3">
+                    <label for="{{ champ }}" class="form-label">{{ champ }}</label>
+                    <input type="text" class="form-control" name="{{ champ }}" id="{{ champ }}" required>
+                </div>
             {% endfor %}
-            <input type="submit" value="Ajouter">
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary ms-2">⬅️ Retour</a>
         </form>
-        <p><a href="{{ url_for('admin_dashboard') }}">⬅️ Retour</a></p>
-    """, table=table, schema=schema)
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""", table=table, schema=schema)
 
 
 
