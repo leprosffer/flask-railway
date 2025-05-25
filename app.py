@@ -1,4 +1,4 @@
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from flask import Flask, render_template_string, request, redirect, url_for, session, Response
@@ -85,7 +85,7 @@ def formulaire():
                 return "⚠️ Cette adresse e-mail est déjà utilisée."
 
         mot_de_passe = request.form["mot_de_passe"]
-        mot_de_passe_hash = bcrypt.hashpw(mot_de_passe.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        mot_de_passe_hash = generate_password_hash(mot_de_passe).decode('utf-8')
 
         data = {
             "nom": request.form["nom"],
@@ -617,9 +617,7 @@ def login():
         email = request.form.get('email')
         mot_de_passe = request.form.get('mot_de_passe')
 
-        # Recherche dans la table utilisateurs
-        table = "utilisateurs"
-        utilisateurs = file_manager.load_data(table)
+        utilisateurs = file_manager.load_data("utilisateurs")
 
         for user in utilisateurs:
             if user["email"] == email and user["mot_de_passe"] == mot_de_passe:
@@ -633,105 +631,31 @@ def login():
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <title>Connexion utilisateur</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-<div class="container py-5">
-<h2 class="mb-4 text-center">🧑‍💼 Panneau d'administration</h2>
-<p class="text-center">Table active : <strong>{{ active_table }}</strong></p>
-<h3 class="mt-4">Tables existantes :</h3>
-<div class="table-responsive">
-<table class="table table-bordered table-striped">
-<thead class="table-primary">
-<tr>
-<th>Nom de la table</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 40px;
-        text-align: center;
-    }
-
-    h2 {
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    form {
-        display: inline-block;
-        text-align: left;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        min-width: 320px;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    select {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    input[type="submit"] {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    input[type="submit"]:hover {
-        background: #0056b3;
-    }
-
-    p {
-        margin-top: 15px;
-    }
-
-    a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    .logout {
-        margin-top: 30px;
-        display: inline-block;
-    }
-
-    .logout a {
-        color: #ff6600;
-    }
-</style>
-        <h2>Connexion utilisateur</h2>
-        <form method="POST">
-            Email : <input name="email" type="email"><br>
-            Mot de passe : <input name="mot_de_passe" type="password"><br>
-            <input type="submit" value="Se connecter">
-        </form>
-        <p>Pas encore inscrit ? <a href="{{ url_for('formulaire') }}">Créer un compte</a></p>
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+<div class="card p-4 shadow" style="width: 100%; max-width: 400px;">
+    <h2 class="text-center mb-4">Connexion utilisateur</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Adresse e-mail</label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mot de passe</label>
+            <input type="password" name="mot_de_passe" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+    </form>
+    <p class="text-center mt-3">
+        Pas encore inscrit ? <a href="{{ url_for('formulaire') }}">Créer un compte</a>
+    </p>
+</div>
+</body>
+</html>
     """)
-
 
 
 
