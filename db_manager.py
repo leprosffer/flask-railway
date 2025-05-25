@@ -73,3 +73,12 @@ def add_user(table, data):
     cur.execute(f"INSERT INTO {table} ({champs}) VALUES ({placeholders})", valeurs)
     conn.commit()
     conn.close()
+
+
+def list_tables():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    tables = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return tables
