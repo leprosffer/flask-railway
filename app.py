@@ -1,4 +1,4 @@
-from werkzeug.security import generate_password_hash, check_password_hash
+import bcrypt
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from flask import Flask, render_template_string, request, redirect, url_for, session, Response
@@ -19,50 +19,106 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
 
 
-@app.route('/inscription', methods=['GET', 'POST'])
-def inscription():
-    if request.method == 'POST':
-        # Traitement du formulaire
-        ...
+# 🧾 HTML pour le formulaire d'inscription
+formulaire_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulaire Utilisateur</title>
+   <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 40px;
+        text-align: center;
+    }
 
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Inscription</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
-    <div class="card p-4 shadow" style="max-width: 400px; width: 100%;">
-        <h2 class="text-center mb-4">Inscription</h2>
-        <form method="POST">
-            <div class="mb-3">
-                <label class="form-label">Nom</label>
-                <input type="text" name="nom" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Prénom</label>
-                <input type="text" name="prenom" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Adresse mail</label>
-                <input type="email" name="email" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Mot de passe</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
-            <p class="text-center mt-3">
-                Déjà un compte ? <a href="{{ url_for('connexion') }}">Se connecter ici</a>
-            </p>
-        </form>
-    </div>
-    </body>
-    </html>
-    """)
+    h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    form {
+        display: inline-block;
+        text-align: left;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        min-width: 320px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    input[type="submit"] {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    input[type="submit"]:hover {
+        background: #0056b3;
+    }
+
+    p {
+        margin-top: 15px;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .logout {
+        margin-top: 30px;
+        display: inline-block;
+    }
+
+    .logout a {
+        color: #ff6600;
+    }
+</style>
+</head>
+<body>
+    <h2>Formulaire d'inscription</h2>
+    <form method="POST">
+        Nom : <input type="text" name="nom"><br>
+        Prénom : <input type="text" name="prenom"><br>
+        Genre :
+        <select name="genre">
+            <option value="Homme">Homme</option>
+            <option value="Femme">Femme</option>
+            <option value="Autre">Autre</option>
+        </select><br>
+        Adresse mail : <input type="email" name="adresse_mail"><br>
+        Mot de passe : <input type="password" name="mot_de_passe"><br>
+        <input type="submit" value="Envoyer">
+    </form>
+    <p>Déjà inscrit ? <a href="/login">Se connecter ici</a></p>
+</body>
+</html>
+"""
 
 # ✅ Page d'accueil : formulaire dynamique
 @app.route('/', methods=['GET', 'POST'])
@@ -85,7 +141,7 @@ def formulaire():
                 return "⚠️ Cette adresse e-mail est déjà utilisée."
 
         mot_de_passe = request.form["mot_de_passe"]
-        mot_de_passe_hash = generate_password_hash(mot_de_passe).decode('utf-8')
+        mot_de_passe_hash = bcrypt.hashpw(mot_de_passe.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
         data = {
             "nom": request.form["nom"],
@@ -147,34 +203,64 @@ def admin_login():
             session['admin'] = True
             return redirect(url_for('admin_dashboard'))
         return "❌ Identifiants incorrects."
-
+    
     return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Connexion Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex justify-content-center align-items-center" style="height: 100vh;">
-    <div class="card p-4 shadow" style="width: 100%; max-width: 400px;">
-        <h2 class="text-center mb-4">Connexion Admin</h2>
+
+    <style>
+        body {
+            background: #f4f4f4;
+            font-family: Arial;
+            text-align: center;
+            padding: 40px;
+        }
+
+        form {
+            background: white;
+            display: inline-block;
+            text-align: left;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+
+        input[type="submit"] {
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background: #218838;
+        }
+    </style>
+        <h2>Connexion Admin</h2>
         <form method="POST">
-            <div class="mb-3">
-                <label for="username" class="form-label">Nom d'utilisateur</label>
-                <input type="text" class="form-control" name="username" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Mot de passe</label>
-                <input type="password" class="form-control" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-success w-100">Connexion</button>
+            Nom d'utilisateur : <input name="username"><br>
+            Mot de passe : <input type="password" name="password"><br>
+            <input type="submit" value="Connexion">
         </form>
-    </div>
-</body>
-</html>
-""")
+    """)
 
 @app.route('/admin')
 def admin_dashboard():
@@ -185,89 +271,84 @@ def admin_dashboard():
     active_table = session_manager.get_active_table()
 
     return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-        }
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #f8f9fa;
+                padding: 40px;
+                text-align: center;
+            }
 
-        table {
-            margin: auto;
-            border-collapse: collapse;
-            width: 80%;
-            background: white;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        }
+            table {
+                margin: auto;
+                border-collapse: collapse;
+                width: 80%;
+                background: white;
+                box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            }
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-        }
+            th, td {
+                padding: 12px;
+                border: 1px solid #ddd;
+            }
 
-        th {
-            background-color: #007bff;
-            color: white;
-        }
+            th {
+                background-color: #007bff;
+                color: white;
+            }
 
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
+            a {
+                color: #007bff;
+                text-decoration: none;
+            }
 
-        a:hover {
-            text-decoration: underline;
-        }
+            a:hover {
+                text-decoration: underline;
+            }
 
-        .admin-actions a {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 15px;
-            background: #e9ecef;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body class="bg-light">
-<div class="container py-5">
-    <h2 class="mb-4 text-center">🧑‍💼 Panneau d'administration</h2>
-    <p class="text-center">Table active : <strong>{{ active_table }}</strong></p>
-    <h3 class="mt-4">Tables existantes :</h3>
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead class="table-primary">
-                <tr>
-                    <th>Nom de la table</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for table in tables %}
-                <tr>
-                    <td>{{ table }}</td>
-                    <td>
-                        [<a href="{{ url_for('admin_set_table', name=table) }}">Utiliser</a>] |
-                        [<a href="{{ url_for('admin_view_data') }}?table={{ table }}">Voir données</a>]
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            .admin-actions {
+                margin-top: 20px;
+            }
+
+            .admin-actions a {
+                display: inline-block;
+                margin: 10px;
+                padding: 10px 15px;
+                background: #e9ecef;
+                border-radius: 4px;
+            }
+        </style>
+
+        <h2>🧑‍💼 Panneau d'administration</h2>
+        <p>Table active : <strong>{{ active_table }}</strong></p>
+
+        <h3>Tables existantes :</h3>
+        <table>
+            <tr>
+                <th>Nom de la table</th>
+                <th>Actions</th>
+            </tr>
+            {% for table in tables %}
+            <tr>
+                <td>{{ table }}</td>
+                <td>
+                    [<a href="{{ url_for('admin_set_table', name=table) }}">Utiliser</a>] |
+                    [<a href="{{ url_for('admin_view_data') }}?table={{ table }}">Voir données</a>]
+                </td>
+            </tr>
+            {% endfor %}
         </table>
-    </div>
 
-    <div class="mt-4 admin-actions text-center">
-        <p>📝 <a href="{{ url_for('admin_add_user') }}">Ajouter un utilisateur (via formulaire)</a></p>
-        <p>🔒 <a href="{{ url_for('admin_logout') }}">Déconnexion</a></p>
-    </div>
-</div>
-</body>
-</html>
-""", tables=tables, active_table=active_table)
+        <div class="admin-actions">
+            <p>📝 <a href="{{ url_for('admin_add_user') }}">Ajouter un utilisateur (via formulaire)</a></p>
+            <p>🔒 <a href="{{ url_for('admin_logout') }}">Déconnexion</a></p>
+        </div>
+    """, tables=tables, active_table=active_table)
+
+    if schema_manager.load_schema(table):
+        session_manager.set_active_table(table)
+    return redirect(url_for('admin_dashboard'))
+
 
 @app.route('/admin/data')
 def admin_view_data():
@@ -617,7 +698,9 @@ def login():
         email = request.form.get('email')
         mot_de_passe = request.form.get('mot_de_passe')
 
-        utilisateurs = file_manager.load_data("utilisateurs")
+        # Recherche dans la table utilisateurs
+        table = "utilisateurs"
+        utilisateurs = file_manager.load_data(table)
 
         for user in utilisateurs:
             if user["email"] == email and user["mot_de_passe"] == mot_de_passe:
@@ -627,35 +710,89 @@ def login():
         return "❌ Identifiants incorrects."
 
     return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion utilisateur</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
-<div class="card p-4 shadow" style="width: 100%; max-width: 400px;">
-    <h2 class="text-center mb-4">Connexion utilisateur</h2>
-    <form method="POST">
-        <div class="mb-3">
-            <label class="form-label">Adresse e-mail</label>
-            <input type="email" name="email" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mot de passe</label>
-            <input type="password" name="mot_de_passe" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
-    </form>
-    <p class="text-center mt-3">
-        Pas encore inscrit ? <a href="{{ url_for('formulaire') }}">Créer un compte</a>
-    </p>
-</div>
-</body>
-</html>
+        <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 40px;
+        text-align: center;
+    }
+
+    h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    form {
+        display: inline-block;
+        text-align: left;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        min-width: 320px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    input[type="submit"] {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    input[type="submit"]:hover {
+        background: #0056b3;
+    }
+
+    p {
+        margin-top: 15px;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .logout {
+        margin-top: 30px;
+        display: inline-block;
+    }
+
+    .logout a {
+        color: #ff6600;
+    }
+</style>
+        <h2>Connexion utilisateur</h2>
+        <form method="POST">
+            Email : <input name="email" type="email"><br>
+            Mot de passe : <input name="mot_de_passe" type="password"><br>
+            <input type="submit" value="Se connecter">
+        </form>
+        <p>Pas encore inscrit ? <a href="{{ url_for('formulaire') }}">Créer un compte</a></p>
     """)
+
 
 
 
