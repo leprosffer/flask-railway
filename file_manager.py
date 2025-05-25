@@ -1,44 +1,71 @@
-import os
-import json
+import sqlite3
 
-DB_PATH = "db_data"
+DB_PATH = "data.db"
 
-def get_table_path(table_name):
-    return os.path.join(DB_PATH, f"{table_name}.json")
-
-def get_schema_path(table_name):
-    return os.path.join(DB_PATH, f"{table_name}_schema.json")
-
-def save_data(table_name, data):
-    with open(get_table_path(table_name), "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-
-def load_data(table_name):
-    path = get_table_path(table_name)
-    if not os.path.exists(path):
-        return []
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def save_schema(table_name, schema):
-    with open(get_schema_path(table_name), "w", encoding="utf-8") as f:
-        json.dump(schema, f, indent=2)
-
-def load_schema(table_name):
-    path = get_schema_path(table_name)
-    if not os.path.exists(path):
-        return None
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def delete_table(table_name):
-    os.remove(get_table_path(table_name))
-    os.remove(get_schema_path(table_name))
-
+def connect():
+    return sqlite3.connect(DB_PATH)
 
 def list_tables():
-    """Liste toutes les tables (fichiers .json sans _schema)"""
-    if not os.path.exists(DB_PATH):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    tables = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return tables
+
+def load_data(table):
+    conn = connect()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"SELECT * FROM {table}")
+        columns = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+        data = [dict(zip(columns, row)) for row in rows]
+        return data
+    except sqlite3.Error:
         return []
-    return [f.replace(".json", "") for f in os.listdir(DB_PATH)
-            if f.endswith(".json") and not f.endswith("_schema.json")]
+    finally:
+        conn.close()
+
+def save_data(table, data):
+    """Efface et remplace toutes les données d'une table (utiliser avec précaution)."""
+    if not data:
+        return
+
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute(f"DELETE FROM {table}")
+    champs = data[0].keys()
+    for record in data:
+        values = tuple(record[ch] for ch in champs)
+        placeholders = ", ".join(["?"] * len(champs))
+        champs_str = ", ".join(champs)
+        cursor.execute(f"INSERT INTO {table} ({champs_str}) VALUES ({placeholders})", values)
+    conn.commit()
+    conn.close()
+
+def insert_data(table, record):
+    conn = connect()
+    cursor = conn.cursor()
+    champs = ", ".join(record.keys())
+    placeholders = ", ".join(["?"] * len(record))
+    cursor.execute(f"INSERT INTO {table} ({champs}) VALUES ({placeholders})", tuple(record.values()))
+    conn.commit()
+    conn.close()
+
+def update_data(table, id, record):
+    conn = connect()
+    cursor = conn.cursor()
+    champs = ", ".join([f"{k}=?" for k in record.keys()])
+    valeurs = list(record.values())
+    valeurs.append(id)
+    cursor.execute(f"UPDATE {table} SET {champs} WHERE id=?", valeurs)
+    conn.commit()
+    conn.close()
+
+def delete_data(table, id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute(f"DELETE FROM {table} WHERE id=?", (id,))
+    conn.commit()
+    conn.close()

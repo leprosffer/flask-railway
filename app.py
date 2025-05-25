@@ -4,7 +4,7 @@ import os
 from flask import Flask, render_template_string, request, redirect, url_for, session, Response
 import session_manager
 import schema_manager
-import file_manager
+import db_manager as file_manager
 import data_validator
 import csv
 import io
@@ -269,63 +269,59 @@ def admin_view_data():
     data = file_manager.load_data(table)
 
     return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Données de la table {{ table }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Données de la table {{ table }}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container py-5">
+            <h2 class="text-center mb-4">📊 Données de la table <strong>{{ table }}</strong></h2>
 
-    <div class="container py-5">
-        <h2 class="text-center mb-4">📊 Données de la table <strong>{{ table }}</strong></h2>
-
-        {% if data %}
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover bg-white shadow-sm">
-                <thead class="table-primary">
-                    <tr>
-                        {% for key in data[0].keys() %}
-                        <th>{{ key }}</th>
+            {% if data %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover bg-white shadow-sm">
+                    <thead class="table-primary">
+                        <tr>
+                            {% for key in data[0].keys() %}
+                                <th>{{ key }}</th>
+                            {% endfor %}
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                            <td class="actions">
+    <a href="{{ url_for('admin_edit_user', id=row['id']) }}" class="btn btn-sm btn-warning">✏️</a>
+    <a href="{{ url_for('admin_delete_user', id=row['id']) }}" class="btn btn-sm btn-danger">🗑️</a>
+</td>
+                        </tr>
                         {% endfor %}
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in data %}
-                    <tr>
-                        {% for value in row.values() %}
-                        <td>{{ value }}</td>
-                        {% endfor %}
-                        <td class="actions">
-                            <a href="{{ url_for('admin_edit_user', index=loop.index0) }}" class="btn btn-sm btn-warning">✏️</a>
-                            <a href="{{ url_for('admin_delete_user', index=loop.index0) }}" class="btn btn-sm btn-danger">🗑️</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            <p class="text-center">🔍 Aucune donnée trouvée.</p>
-        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p class="text-center">🔍 Aucune donnée trouvée.</p>
+            {% endif %}
 
-        <div class="text-center mt-4">
-            <a href="{{ url_for('admin_add_user') }}" class="btn btn-info m-1">➕ Ajouter un utilisateur</a>
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary m-1">⬅️ Retour admin</a>
-            <a href="{{ url_for('admin_export_csv') }}" class="btn btn-success m-1">⬇️ Exporter en CSV</a>
-            <a href="{{ url_for('admin_import_csv') }}" class="btn btn-primary m-1">📤 Importer un CSV</a>
+            <div class="text-center mt-4">
+                <a href="{{ url_for('admin_add_user') }}" class="btn btn-info m-1">➕ Ajouter un utilisateur</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary m-1">⬅️ Retour admin</a>
+                <a href="{{ url_for('admin_export_csv') }}" class="btn btn-success m-1">⬇️ Exporter en CSV</a>
+                <a href="{{ url_for('admin_import_csv') }}" class="btn btn-primary m-1">📤 Importer un CSV</a>
+            </div>
         </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-""", table=table, data=data)
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
+    """, table=table, data=data)
 
 
 
@@ -386,98 +382,114 @@ def admin_add_user():
         return "⚠️ Aucune table active."
 
     schema = schema_manager.load_schema(table)
+    
     if request.method == 'POST':
         data = {}
         for champ in schema:
             data[champ] = request.form.get(champ)
 
         validated = data_validator.validate_record(data, schema)
-        file_manager.save_data(table, file_manager.load_data(table) + [validated])
+        file_manager.insert_data(table, validated)
         return redirect(url_for('admin_view_data'))
 
     return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Ajouter un utilisateur</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h2 class="text-center mb-4">➕ Ajouter un utilisateur à <strong>{{ table }}</strong></h2>
-
-        <form method="POST" class="bg-white p-4 rounded shadow-sm">
-            {% for champ in schema %}
-                <div class="mb-3">
-                    <label for="{{ champ }}" class="form-label">{{ champ }}</label>
-                    <input type="text" class="form-control" name="{{ champ }}" id="{{ champ }}" required>
-                </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Ajouter</button>
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary ms-2">⬅️ Retour</a>
-        </form>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-""", table=table, schema=schema)
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Ajouter un utilisateur</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container py-5">
+            <h2 class="mb-4">➕ Ajouter un utilisateur à <strong>{{ table }}</strong></h2>
+            <form method="POST" class="bg-white p-4 rounded shadow-sm">
+                {% for champ in schema %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ champ }}</label>
+                        <input name="{{ champ }}" class="form-control">
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-100">Ajouter</button>
+            </form>
+            <p class="mt-3"><a href="{{ url_for('admin_dashboard') }}">⬅️ Retour</a></p>
+        </div>
+    </body>
+    </html>
+    """, table=table, schema=schema)
 
 
 
 
-@app.route('/admin/delete_user/<int:index>')
-def admin_delete_user(index):
+@app.route('/admin/delete_user/<int:id>')
+def admin_delete_user(id):
     if not session.get('admin'):
         return redirect(url_for('admin_login'))
 
     table = session_manager.get_active_table()
-    data = file_manager.load_data(table)
-    if index < len(data):
-        del data[index]
-        file_manager.save_data(table, data)
+    if not table:
+        return "⚠️ Aucune table active."
 
-    return redirect(url_for('admin_view_data'))
+    try:
+        file_manager.delete_user(table, id)
+        return redirect(url_for('admin_view_data'))
+    except Exception as e:
+        return f"❌ Erreur lors de la suppression : {str(e)}"
 
 
 
 
-@app.route('/admin/edit_user/<int:index>', methods=['GET', 'POST'])
-def admin_edit_user(index):
+@app.route('/admin/edit_user/<int:id>', methods=['GET', 'POST'])
+def admin_edit_user(id):
     if not session.get('admin'):
         return redirect(url_for('admin_login'))
 
     table = session_manager.get_active_table()
+    if not table:
+        return "⚠️ Aucune table active."
+
     schema = schema_manager.load_schema(table)
     data = file_manager.load_data(table)
 
-    if index >= len(data):
-        return "Index invalide"
+    utilisateur = next((u for u in data if u["id"] == id), None)
+    if not utilisateur:
+        return "⚠️ Utilisateur introuvable."
 
     if request.method == 'POST':
-        modifie = {}
         for champ in schema:
-            modifie[champ] = request.form.get(champ)
-        validated = data_validator.validate_record(modifie, schema)
-        data[index] = validated
-        file_manager.save_data(table, data)
+            utilisateur[champ] = request.form.get(champ)
+
+        validated = data_validator.validate_record(utilisateur, schema)
+        file_manager.update_data(table, id, validated)
         return redirect(url_for('admin_view_data'))
 
-    record = data[index]
     return render_template_string("""
-        <h2>Modifier utilisateur #{{ index }}</h2>
-        <form method="POST">
-            {% for champ in schema %}
-                {{ champ }} : <input name="{{ champ }}" value="{{ record[champ] }}"><br>
-            {% endfor %}
-            <input type="submit" value="Enregistrer">
-        </form>
-        <p><a href="{{ url_for('admin_view_data') }}">⬅️ Retour</a></p>
-    """, index=index, schema=schema, record=record)
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Modifier utilisateur</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container py-5">
+            <h2 class="mb-4">✏️ Modifier l'utilisateur</h2>
+            <form method="POST" class="bg-white p-4 rounded shadow-sm">
+                {% for champ in schema %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ champ }}</label>
+                        <input name="{{ champ }}" class="form-control" value="{{ utilisateur[champ] }}">
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+            </form>
+            <p class="mt-3"><a href="{{ url_for('admin_view_data') }}">⬅️ Retour</a></p>
+        </div>
+    </body>
+    </html>
+    """, utilisateur=utilisateur, schema=schema)
 
 
 
@@ -571,11 +583,13 @@ def login():
         utilisateurs = file_manager.load_data(table)
 
         for user in utilisateurs:
-            if user["email"] == email and user["mot_de_passe"] == mot_de_passe:
+            if user["email"] == email and check_password_hash(user["mot_de_passe"], mot_de_passe):
                 session["user_email"] = email
                 return redirect(url_for('mon_espace'))
 
         return "❌ Identifiants incorrects."
+
+    # formulaire HTML...
 
     return render_template_string("""
 <!DOCTYPE html>
