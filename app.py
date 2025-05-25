@@ -132,16 +132,26 @@ def formulaire():
         if not schema:
             return f"⚠️ Schéma introuvable pour la table '{nom_table}'."
 
+        email = request.form["adresse_mail"]
+        anciens = file_manager.load_data(nom_table)
+
+        # Vérification d'unicité de l'adresse email
+        for utilisateur in anciens:
+            if utilisateur.get("email") == email:
+                return "⚠️ Cette adresse e-mail est déjà utilisée."
+
+        mot_de_passe = request.form["mot_de_passe"]
+        mot_de_passe_hash = bcrypt.hashpw(mot_de_passe.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
         data = {
             "nom": request.form["nom"],
             "prenom": request.form["prenom"],
             "genre": request.form["genre"],
-            "email": request.form["adresse_mail"],
-            "mot_de_passe": request.form["mot_de_passe"]
+            "email": email,
+            "mot_de_passe": mot_de_passe_hash
         }
 
         validated = data_validator.validate_record(data, schema)
-        anciens = file_manager.load_data(nom_table)
         file_manager.save_data(nom_table, anciens + [validated])
         return f"✅ Données ajoutées à la table '{nom_table}' avec succès !"
 
