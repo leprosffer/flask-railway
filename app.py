@@ -268,7 +268,7 @@ def admin_view_data():
 
     data = file_manager.load_data(table)
 
-return render_template_string("""
+   return render_template_string("""
 <!DOCTYPE html>
 <html lang="fr">
 <head>
