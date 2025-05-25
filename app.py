@@ -268,123 +268,64 @@ def admin_view_data():
 
     data = file_manager.load_data(table)
 
-    return render_template_string("""
+return render_template_string("""
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Données de la table {{ table }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-        <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-    }
+    <div class="container py-5">
+        <h2 class="text-center mb-4">📊 Données de la table <strong>{{ table }}</strong></h2>
 
-    h2 {
-        color: #333;
-    }
-
-    form {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 400px;
-        margin: auto;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    select {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    input[type="submit"] {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    input[type="submit"]:hover {
-        background: #0056b3;
-    }
-
-    .table-container {
-        max-width: 90%;
-        margin: auto;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-        padding: 12px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    th {
-        background-color: #007bff;
-        color: white;
-    }
-
-    a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    .actions {
-        white-space: nowrap;
-    }
-</style>
-
-        <h2>Données de la table '{{ table }}'</h2>
         {% if data %}
-            <table border="1">
-                <tr>
-                    {% for key in data[0].keys() %}
-                    <th>{{ key }}</th>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover bg-white shadow-sm">
+                <thead class="table-primary">
+                    <tr>
+                        {% for key in data[0].keys() %}
+                        <th>{{ key }}</th>
+                        {% endfor %}
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                        <td class="actions">
+                            <a href="{{ url_for('admin_edit_user', index=loop.index0) }}" class="btn btn-sm btn-warning">✏️</a>
+                            <a href="{{ url_for('admin_delete_user', index=loop.index0) }}" class="btn btn-sm btn-danger">🗑️</a>
+                        </td>
+                    </tr>
                     {% endfor %}
-                    <th>Actions</th>
-                </tr>
-                {% for row in data %}
-                <tr>
-                    {% for value in row.values() %}
-                    <td>{{ value }}</td>
-                    {% endfor %}
-                    <td>
-                        <a href="{{ url_for('admin_edit_user', index=loop.index0) }}">✏️ Modifier</a> |
-                        <a href="{{ url_for('admin_delete_user', index=loop.index0) }}">🗑️ Supprimer</a>
-                    </td>
-                </tr>
-                {% endfor %}
+                </tbody>
             </table>
+        </div>
         {% else %}
-            <p>🔍 Aucune donnée trouvée.</p>
+            <p class="text-center">🔍 Aucune donnée trouvée.</p>
         {% endif %}
-        <p><a href="{{ url_for('admin_add_user') }}">➕ Ajouter un utilisateur</a></p>
-        <p><a href="{{ url_for('admin_dashboard') }}">⬅️ Retour admin</a></p>
-        <p><a href="{{ url_for('admin_export_csv') }}">⬇️ Exporter en CSV</a></p>
 
-        <p><a href="{{ url_for('admin_import_csv') }}">📤 Importer un CSV</a></p>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin_add_user') }}" class="btn btn-info m-1">➕ Ajouter un utilisateur</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary m-1">⬅️ Retour admin</a>
+            <a href="{{ url_for('admin_export_csv') }}" class="btn btn-success m-1">⬇️ Exporter en CSV</a>
+            <a href="{{ url_for('admin_import_csv') }}" class="btn btn-primary m-1">📤 Importer un CSV</a>
+        </div>
+    </div>
 
-    """, table=table, data=data)
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""", table=table, data=data)
 
 
 
