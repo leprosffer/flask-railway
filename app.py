@@ -148,8 +148,31 @@ def admin_login():
         return "❌ Identifiants incorrects."
     
     return render_template_string("""
-
-    <style>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex justify-content-center align-items-center" style="height: 100vh;">
+<div class="card p-4 shadow" style="width: 100%; max-width: 400px;">
+<h2 class="text-center mb-4">Connexion Admin</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label for="username" class="form-label">Nom d'utilisateur</label>
+        <input type="text" class="form-control" name="username" required>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input type="password" class="form-control" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-success w-100">Connexion</button>
+</form>
+</div>
+</body>
+</html>
+"""
         body {
             background: #f4f4f4;
             font-family: Arial;
@@ -214,7 +237,27 @@ def admin_dashboard():
     active_table = session_manager.get_active_table()
 
     return render_template_string("""
-        <style>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+<h2 class="mb-4 text-center">🧑‍💼 Panneau d'administration</h2>
+<p class="text-center">Table active : <strong>{{ active_table }}</strong></p>
+<h3 class="mt-4">Tables existantes :</h3>
+<div class="table-responsive">
+<table class="table table-bordered table-striped">
+<thead class="table-primary">
+<tr>
+<th>Nom de la table</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
             body {
                 font-family: Arial, sans-serif;
                 background: #f8f9fa;
@@ -280,13 +323,15 @@ def admin_dashboard():
                 </td>
             </tr>
             {% endfor %}
-        </table>
-
-        <div class="admin-actions">
+        </tbody></table></div>
+<div class="mt-4">
             <p>📝 <a href="{{ url_for('admin_add_user') }}">Ajouter un utilisateur (via formulaire)</a></p>
             <p>🔒 <a href="{{ url_for('admin_logout') }}">Déconnexion</a></p>
         </div>
-    """, tables=tables, active_table=active_table)
+</div>
+</body>
+</html>
+""", tables=tables, active_table=active_table)
 
     if schema_manager.load_schema(table):
         session_manager.set_active_table(table)
@@ -653,7 +698,27 @@ def login():
         return "❌ Identifiants incorrects."
 
     return render_template_string("""
-        <style>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+<h2 class="mb-4 text-center">🧑‍💼 Panneau d'administration</h2>
+<p class="text-center">Table active : <strong>{{ active_table }}</strong></p>
+<h3 class="mt-4">Tables existantes :</h3>
+<div class="table-responsive">
+<table class="table table-bordered table-striped">
+<thead class="table-primary">
+<tr>
+<th>Nom de la table</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
     body {
         font-family: Arial, sans-serif;
         background: #f4f4f4;
