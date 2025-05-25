@@ -69,3 +69,10 @@ def delete_data(table, id):
     cursor.execute(f"DELETE FROM {table} WHERE id=?", (id,))
     conn.commit()
     conn.close()
+
+def load_schema(table_name):
+    schema_path = os.path.join("schemas", f"{table_name}.json")
+    if not os.path.exists(schema_path):
+        return None
+    with open(schema_path, "r", encoding="utf-8") as f:
+        return json.load(f)

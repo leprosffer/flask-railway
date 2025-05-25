@@ -1,6 +1,7 @@
 import file_manager
 import file_manager
 import os
+import json
 
 def create_schema(table_name, fields):
     """
@@ -41,8 +42,13 @@ def list_schema(table_name):
     print(f"📋 Schéma de la table '{table_name}':")
     for field, ftype in schema.items():
         print(f"  - {field}: {ftype}")
+
 def load_schema(table_name):
-    return file_manager.load_schema(table_name)
+    schema_path = f"schemas/{table_name}.json"
+    if os.path.exists(schema_path):
+        with open(schema_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
 
 def supprimer_table(table_name):
     data_path = f"db_data/{table_name}.json"
