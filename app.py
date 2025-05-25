@@ -22,100 +22,53 @@ ADMIN_PASSWORD = "admin123"
 # 🧾 HTML pour le formulaire d'inscription
 formulaire_html = """
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Formulaire Utilisateur</title>
-   <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        margin: 0;
-        padding: 40px;
-        text-align: center;
-    }
-
-    h2 {
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    form {
-        display: inline-block;
-        text-align: left;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        min-width: 320px;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    select {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    input[type="submit"] {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    input[type="submit"]:hover {
-        background: #0056b3;
-    }
-
-    p {
-        margin-top: 15px;
-    }
-
-    a {
-        color: #007bff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    .logout {
-        margin-top: 30px;
-        display: inline-block;
-    }
-
-    .logout a {
-        color: #ff6600;
-    }
-</style>
+    <meta charset="UTF-8">
+    <title>Formulaire d'inscription</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h2>Formulaire d'inscription</h2>
-    <form method="POST">
-        Nom : <input type="text" name="nom"><br>
-        Prénom : <input type="text" name="prenom"><br>
-        Genre :
-        <select name="genre">
-            <option value="Homme">Homme</option>
-            <option value="Femme">Femme</option>
-            <option value="Autre">Autre</option>
-        </select><br>
-        Adresse mail : <input type="email" name="adresse_mail"><br>
-        Mot de passe : <input type="password" name="mot_de_passe"><br>
-        <input type="submit" value="Envoyer">
-    </form>
-    <p>Déjà inscrit ? <a href="/login">Se connecter ici</a></p>
+<body class="bg-light">
+    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+        <div class="card shadow p-4 w-100" style="max-width: 500px;">
+            <h2 class="text-center mb-4">Formulaire d'inscription</h2>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="nom" class="form-label">Nom</label>
+                    <input type="text" name="nom" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prenom" class="form-label">Prénom</label>
+                    <input type="text" name="prenom" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="genre" class="form-label">Genre</label>
+                    <select name="genre" class="form-select" required>
+                        <option value="">Sélectionner</option>
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="adresse_mail" class="form-label">Adresse mail</label>
+                    <input type="email" name="adresse_mail" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                    <input type="password" name="mot_de_passe" class="form-control" required>
+                </div>
+                <div class="d-grid">
+                    <input type="submit" value="Envoyer" class="btn btn-primary">
+                </div>
+            </form>
+            <p class="mt-3 text-center">Déjà inscrit ? <a href="/login">Se connecter ici</a></p>
+        </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 """
