@@ -1,4 +1,3 @@
-import bcrypt
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from flask import Flask, render_template_string, request, redirect, url_for, session, Response
@@ -94,7 +93,7 @@ def formulaire():
                 return "⚠️ Cette adresse e-mail est déjà utilisée."
 
         mot_de_passe = request.form["mot_de_passe"]
-        mot_de_passe_hash = bcrypt.hashpw(mot_de_passe.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        mot_de_passe_hash = generate_password_hash(mot_de_passe)
 
         data = {
             "nom": request.form["nom"],
@@ -711,5 +710,4 @@ def admin_set_table(name):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
