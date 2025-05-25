@@ -11,6 +11,8 @@ def migrate():
     cursor = conn.cursor()
 
     tables = list_tables()
+    print("Tables JSON à migrer :", tables)  # <- ligne de vérification
+
     for table in tables:
         print(f"Migration de la table : {table}")
         schema = load_schema(table)
@@ -25,7 +27,7 @@ def migrate():
         cursor.execute(f"CREATE TABLE {table} ({columns_sql})")
 
         # Lecture des données JSON
-        data_path = f"tables/{table}.json"
+        data_path = f"db_data/{table}.json"
         if not os.path.exists(data_path):
             continue
 

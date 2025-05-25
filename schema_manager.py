@@ -3,6 +3,15 @@ import file_manager
 import os
 import json
 
+
+def load_schema(table_name):
+    schema_path = f"db_data/{table_name}_schema.json"
+    if os.path.exists(schema_path):
+        with open(schema_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
 def create_schema(table_name, fields):
     """
     Crée un nouveau schéma pour une table
@@ -43,12 +52,13 @@ def list_schema(table_name):
     for field, ftype in schema.items():
         print(f"  - {field}: {ftype}")
 
-def load_schema(table_name):
-    schema_path = f"schemas/{table_name}.json"
-    if os.path.exists(schema_path):
-        with open(schema_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return None
+def list_tables():
+    fichiers = os.listdir("db_data")
+    tables = []
+    for f in fichiers:
+        if f.endswith(".json") and not f.endswith("_schema.json"):
+            tables.append(f.replace(".json", ""))
+    return tables
 
 def supprimer_table(table_name):
     data_path = f"db_data/{table_name}.json"

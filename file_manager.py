@@ -1,16 +1,16 @@
 import sqlite3
-
+import os
 DB_PATH = "data.db"
 
 def connect():
     return sqlite3.connect(DB_PATH)
 
 def list_tables():
-    conn = connect()
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    tables = [row[0] for row in cursor.fetchall()]
-    conn.close()
+    fichiers = os.listdir("db_data")
+    tables = []
+    for f in fichiers:
+        if f.endswith(".json") and not f.endswith("_schema.json"):
+            tables.append(f.replace(".json", ""))
     return tables
 
 def load_data(table):

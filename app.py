@@ -708,6 +708,13 @@ def admin_set_table(name):
     session_manager.set_active_table(name)
     return redirect(url_for('admin_dashboard'))
 
+import sqlite3
+conn = sqlite3.connect("data.db")
+cur = conn.cursor()
+tables = cur.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+print("Tables existantes dans data.db :", tables)
+conn.close()
+
 
 if __name__ == "__main__":
     app.run(debug=True)
