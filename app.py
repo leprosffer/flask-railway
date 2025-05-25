@@ -421,20 +421,20 @@ def admin_add_user():
 
 
 
-@app.route("/admin/delete/<int:id>")
+@app.route('/admin/delete/<int:id>')
 def admin_delete_user(id):
-    if not session.get("admin"):
-        return redirect(url_for("admin_login"))
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
 
     table = session_manager.get_active_table()
     if not table:
-        return "⚠️ Aucune table active."
+        return "⚠️ Aucune table active sélectionnée."
 
-    success = db_manager.delete_user(table, id)
-    if not success:
-        return "❌ Erreur lors de la suppression."
-
-    return redirect(url_for("admin_view_data"))
+    success = file_manager.delete_user(table, id)
+    if success:
+        return redirect(url_for('admin_view_data'))
+    else:
+        return "❌ Erreur lors de la suppression de l'utilisateur."
 
 
 
