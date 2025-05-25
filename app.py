@@ -19,49 +19,50 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
 
 
-# 🧾 HTML pour le formulaire d'inscription
-formulaire_html = """
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulaire</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5" style="max-width: 500px;">
-    <h3 class="mb-4">Formulaire d'inscription</h3>
-    <form method="POST">
-        <div class="mb-3">
-            <label class="form-label">Nom</label>
-            <input type="text" name="nom" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Prénom</label>
-            <input type="text" name="prenom" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Genre</label>
-            <select name="genre" class="form-select" required>
-                <option>Homme</option>
-                <option>Femme</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="adresse_mail" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mot de passe</label>
-            <input type="password" name="mot_de_passe" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Envoyer</button>
-    </form>
-</div>
-</body>
-</html>
-"""
+@app.route('/inscription', methods=['GET', 'POST'])
+def inscription():
+    if request.method == 'POST':
+        # Traitement du formulaire
+        ...
+
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Inscription</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="card p-4 shadow" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4">Inscription</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Nom</label>
+                <input type="text" name="nom" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Prénom</label>
+                <input type="text" name="prenom" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Adresse mail</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mot de passe</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+            <p class="text-center mt-3">
+                Déjà un compte ? <a href="{{ url_for('connexion') }}">Se connecter ici</a>
+            </p>
+        </form>
+    </div>
+    </body>
+    </html>
+    """)
 
 # ✅ Page d'accueil : formulaire dynamique
 @app.route('/', methods=['GET', 'POST'])
