@@ -82,3 +82,17 @@ def list_tables():
     tables = [row[0] for row in cur.fetchall()]
     conn.close()
     return tables
+
+def delete_user(table, user_id):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    try:
+        cur.execute(f"DELETE FROM {table} WHERE id = ?", (user_id,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        print(f"Erreur lors de la suppression : {e}")
+        return False
