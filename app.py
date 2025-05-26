@@ -738,6 +738,30 @@ conn.close()
 
 
 
+def navbar_html():
+    return """
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('accueil') }}">MonApp</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('accueil') }}">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Connexion</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('formulaire') }}">Inscription</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('mon_espace') }}">Mon espace</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+"""
+
+
+
+
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
