@@ -18,65 +18,88 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
 
 
-# 🧾 HTML pour le formulaire d'inscription
-@app.route('/formulaire', methods=['GET', 'POST'])
-def formulaire():
-    if request.method == 'POST':
-        # Traitement du formulaire...
-        pass
 
-    formulaire_html = """
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Formulaire d'inscription</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        {{ navbar|safe }}
-        <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
-            <div class="card shadow p-4 w-100" style="max-width: 500px;">
-                <h2 class="text-center mb-4">Formulaire d'inscription</h2>
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="nom" class="form-label">Nom</label>
-                        <input type="text" name="nom" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="prenom" class="form-label">Prénom</label>
-                        <input type="text" name="prenom" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="genre" class="form-label">Genre</label>
-                        <select name="genre" class="form-select" required>
-                            <option value="">Sélectionner</option>
-                            <option value="Homme">Homme</option>
-                            <option value="Femme">Femme</option>
-                            <option value="Autre">Autre</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="adresse_mail" class="form-label">Adresse mail</label>
-                        <input type="email" name="adresse_mail" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="mot_de_passe" class="form-label">Mot de passe</label>
-                        <input type="password" name="mot_de_passe" class="form-control" required>
-                    </div>
-                    <div class="d-grid">
-                        <input type="submit" value="Envoyer" class="btn btn-primary">
-                    </div>
-                </form>
-                <p class="mt-3 text-center">Déjà inscrit ? <a href="/login">Se connecter ici</a></p>
-            </div>
+
+def navbar_html(active=""):
+    return f"""
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{{{ url_for('accueil') }}}}">MonApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'accueil' else ''}" href="{{{{ url_for('accueil') }}}}">Accueil</a></li>
+            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'login' else ''}" href="{{{{ url_for('login') }}}}">Connexion</a></li>
+            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'formulaire' else ''}" href="{{{{ url_for('formulaire') }}}}">Inscription</a></li>
+            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'mon_espace' else ''}" href="{{{{ url_for('mon_espace') }}}}">Mon espace</a></li>
+            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'contact' else ''}" href="{{{{ url_for('contact') }}}}">Nous contacter</a></li>
+          </ul>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-    </html>
+      </div>
+    </nav>
     """
-    return render_template_string(formulaire_html, navbar=navbar_html("formulaire"))
+
+
+
+
+
+
+# 🧾 HTML pour le formulaire d'inscription
+formulaire_html = """
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire d'inscription</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    {{ navbar|safe }}
+    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+        <div class="card shadow p-4 w-100" style="max-width: 500px;">
+            <h2 class="text-center mb-4">Formulaire d'inscription</h2>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="nom" class="form-label">Nom</label>
+                    <input type="text" name="nom" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prenom" class="form-label">Prénom</label>
+                    <input type="text" name="prenom" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="genre" class="form-label">Genre</label>
+                    <select name="genre" class="form-select" required>
+                        <option value="">Sélectionner</option>
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="adresse_mail" class="form-label">Adresse mail</label>
+                    <input type="email" name="adresse_mail" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                    <input type="password" name="mot_de_passe" class="form-control" required>
+                </div>
+                <div class="d-grid">
+                    <input type="submit" value="Envoyer" class="btn btn-primary">
+                </div>
+            </form>
+            <p class="mt-3 text-center">Déjà inscrit ? <a href="{{ url_for('login') }}">Se connecter ici</a></p>
+        </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+"""
 
 # ✅ Page d'accueil : formulaire dynamique
 @app.route('/', methods=['GET', 'POST'])
@@ -113,7 +136,8 @@ def formulaire():
         file_manager.save_data(nom_table, anciens + [validated])
         return f"✅ Données ajoutées à la table '{nom_table}' avec succès !"
 
-    return render_template_string(formulaire_html)
+    # Affichage du formulaire avec la navbar
+    return render_template_string(formulaire_html, navbar=navbar_html("formulaire"))
 
 # ✅ Page pour choisir une table active
 @app.route('/choisir', methods=['GET', 'POST'])
@@ -741,36 +765,6 @@ cur = conn.cursor()
 tables = cur.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
 print("Tables existantes dans data.db :", tables)
 conn.close()
-
-
-
-def navbar_html(active=""):
-    def nav_item(name, endpoint):
-        if active == endpoint:
-            return f'<li class="nav-item"><a class="nav-link active" aria-current="page" href="#">{name}</a></li>'
-        return f'<li class="nav-item"><a class="nav-link" href="{{{{ url_for(\'{endpoint}\') }}}}">{name}</a></li>'
-
-    return f"""
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{{{{ url_for('accueil') }}}}">MonApp</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            {nav_item('Accueil', 'accueil')}
-            {nav_item('Connexion', 'login')}
-            {nav_item('Inscription', 'formulaire')}
-            {nav_item('Mon espace', 'mon_espace')}
-            {nav_item('Nous contacter', 'contact')}
-          </ul>
-        </div>
-      </div>
-    </nav>
-    """
-
-
 
 
 
