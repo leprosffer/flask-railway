@@ -42,6 +42,12 @@ def navbar_html(active=""):
             <li class="nav-item">
               <a class="nav-link {'active fw-bold' if active == 'contact' else ''}" href="{url_for('contact')}">Nous contacter</a>
             </li>
+            <li class="nav-item">
+  <a class="nav-link {'active fw-bold' if active == 'conditions' else ''}" href="{url_for('conditions_utilisation')}">Conditions</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link {'active fw-bold' if active == 'confidentialite' else ''}" href="{url_for('politique_confidentialite')}">Confidentialité</a>
+</li>
           </ul>
         </div>
       </div>
@@ -790,6 +796,54 @@ def contact():
     """, navbar=navbar_html("contact"))
 
 
+
+
+
+
+
+@app.route("/confidentialite")
+def politique_confidentialite():
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Politique de confidentialité</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        {{ navbar|safe }}
+        <div class="container py-5">
+            <h1>Politique de confidentialité</h1>
+            <p>Nous collectons vos données pour améliorer le service...</p>
+        </div>
+    </body>
+    </html>
+    """, navbar=navbar_html())
+
+
+
+@app.route("/conditions")
+def conditions_utilisation():
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Conditions d'utilisation</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        {{ navbar|safe }}
+        <div class="container py-5">
+            <h1>Conditions d'utilisation</h1>
+            <p>En utilisant ce site, vous acceptez de respecter les règles suivantes...</p>
+        </div>
+    </body>
+    </html>
+    """, navbar=navbar_html())
 
 
 
