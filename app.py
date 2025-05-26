@@ -21,24 +21,27 @@ ADMIN_PASSWORD = "admin123"
 
 
 def navbar_html(active=""):
-    mon_espace_li = ""
-    if "user_email" in session:
-        mon_espace_li = f'<li class="nav-item"><a class="nav-link {"active fw-bold" if active == "mon_espace" else ""}" href="{{{{ url_for("mon_espace") }}}}">Mon espace</a></li>'
-
     return f"""
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="{{{{ url_for('accueil') }}}}">MonApp</a>
+        <a class="navbar-brand" href="{url_for('accueil')}">MonApp</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'accueil' else ''}" href="{{{{ url_for('accueil') }}}}">Accueil</a></li>
-            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'login' else ''}" href="{{{{ url_for('login') }}}}">Connexion</a></li>
-            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'formulaire' else ''}" href="{{{{ url_for('formulaire') }}}}">Inscription</a></li>
-            {mon_espace_li}
-            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'contact' else ''}<a class="nav-link" href="{{ url_for('contact') }}">Nous contacter</a>
+            <li class="nav-item">
+              <a class="nav-link {'active fw-bold' if active == 'accueil' else ''}" href="{url_for('accueil')}">Accueil</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {'active fw-bold' if active == 'login' else ''}" href="{url_for('login')}">Connexion</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {'active fw-bold' if active == 'formulaire' else ''}" href="{url_for('formulaire')}">Inscription</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {'active fw-bold' if active == 'contact' else ''}" href="{url_for('contact')}">Nous contacter</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -723,6 +726,7 @@ def mon_espace():
 </body>
 </html>
 """, utilisateur=utilisateur, navbar=navbar_html("mon_espace"))
+
 
 
 
