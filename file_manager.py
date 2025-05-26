@@ -6,11 +6,11 @@ def connect():
     return sqlite3.connect(DB_PATH)
 
 def list_tables():
-    fichiers = os.listdir("db_data")
-    tables = []
-    for f in fichiers:
-        if f.endswith(".json") and not f.endswith("_schema.json"):
-            tables.append(f.replace(".json", ""))
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    tables = [row[0] for row in cursor.fetchall()]
+    conn.close()
     return tables
 
 def load_data(table):
