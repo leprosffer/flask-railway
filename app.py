@@ -38,7 +38,7 @@ def navbar_html(active=""):
             <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'login' else ''}" href="{{{{ url_for('login') }}}}">Connexion</a></li>
             <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'formulaire' else ''}" href="{{{{ url_for('formulaire') }}}}">Inscription</a></li>
             {mon_espace_li}
-            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'contact' else ''}" href="{{{{ url_for('contact') }}}}">Nous contacter</a></li>
+            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'contact' else ''}<a class="nav-link" href="{{ url_for('contact') }}">Nous contacter</a>
           </ul>
         </div>
       </div>
