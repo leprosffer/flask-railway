@@ -19,58 +19,64 @@ ADMIN_PASSWORD = "admin123"
 
 
 # 🧾 HTML pour le formulaire d'inscription
-formulaire_html = """
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulaire d'inscription</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
-        <div class="card shadow p-4 w-100" style="max-width: 500px;">
-            <h2 class="text-center mb-4">Formulaire d'inscription</h2>
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="nom" class="form-label">Nom</label>
-                    <input type="text" name="nom" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="prenom" class="form-label">Prénom</label>
-                    <input type="text" name="prenom" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="genre" class="form-label">Genre</label>
-                    <select name="genre" class="form-select" required>
-                        <option value="">Sélectionner</option>
-                        <option value="Homme">Homme</option>
-                        <option value="Femme">Femme</option>
-                        <option value="Autre">Autre</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="adresse_mail" class="form-label">Adresse mail</label>
-                    <input type="email" name="adresse_mail" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="mot_de_passe" class="form-label">Mot de passe</label>
-                    <input type="password" name="mot_de_passe" class="form-control" required>
-                </div>
-                <div class="d-grid">
-                    <input type="submit" value="Envoyer" class="btn btn-primary">
-                </div>
-            </form>
-            <p class="mt-3 text-center">Déjà inscrit ? <a href="/login">Se connecter ici</a></p>
+@app.route('/formulaire', methods=['GET', 'POST'])
+def formulaire():
+    if request.method == 'POST':
+        # Traitement du formulaire...
+        pass
+
+    formulaire_html = """
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Formulaire d'inscription</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        {{ navbar|safe }}
+        <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+            <div class="card shadow p-4 w-100" style="max-width: 500px;">
+                <h2 class="text-center mb-4">Formulaire d'inscription</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">Nom</label>
+                        <input type="text" name="nom" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prenom" class="form-label">Prénom</label>
+                        <input type="text" name="prenom" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="genre" class="form-label">Genre</label>
+                        <select name="genre" class="form-select" required>
+                            <option value="">Sélectionner</option>
+                            <option value="Homme">Homme</option>
+                            <option value="Femme">Femme</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adresse_mail" class="form-label">Adresse mail</label>
+                        <input type="email" name="adresse_mail" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                        <input type="password" name="mot_de_passe" class="form-control" required>
+                    </div>
+                    <div class="d-grid">
+                        <input type="submit" value="Envoyer" class="btn btn-primary">
+                    </div>
+                </form>
+                <p class="mt-3 text-center">Déjà inscrit ? <a href="/login">Se connecter ici</a></p>
+            </div>
         </div>
-    </div>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-"""
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
+    """
+    return render_template_string(formulaire_html, navbar=navbar_html("formulaire"))
 
 # ✅ Page d'accueil : formulaire dynamique
 @app.route('/', methods=['GET', 'POST'])
