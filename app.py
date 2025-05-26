@@ -625,7 +625,7 @@ def login():
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-""", navbar=navbar_html())
+""", navbar=navbar_html("login"))
 
 
 
@@ -738,25 +738,31 @@ conn.close()
 
 
 
-def navbar_html():
-    return """
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{{ url_for('accueil') }}">MonApp</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('accueil') }}">Accueil</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Connexion</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('formulaire') }}">Inscription</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('mon_espace') }}">Mon espace</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-"""
+def navbar_html(active=""):
+    def nav_item(name, endpoint):
+        if active == endpoint:
+            return f'<li class="nav-item"><a class="nav-link active" aria-current="page" href="#">{name}</a></li>'
+        return f'<li class="nav-item"><a class="nav-link" href="{{{{ url_for(\'{endpoint}\') }}}}">{name}</a></li>'
+
+    return f"""
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{{{ url_for('accueil') }}}}">MonApp</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            {nav_item('Accueil', 'accueil')}
+            {nav_item('Connexion', 'login')}
+            {nav_item('Inscription', 'formulaire')}
+            {nav_item('Mon espace', 'mon_espace')}
+            {nav_item('Nous contacter', 'contact')}
+          </ul>
+        </div>
+      </div>
+    </nav>
+    """
 
 
 
