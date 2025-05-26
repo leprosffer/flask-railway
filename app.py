@@ -21,6 +21,10 @@ ADMIN_PASSWORD = "admin123"
 
 
 def navbar_html(active=""):
+    mon_espace_li = ""
+    if "user_email" in session:
+        mon_espace_li = f'<li class="nav-item"><a class="nav-link {"active fw-bold" if active == "mon_espace" else ""}" href="{{{{ url_for("mon_espace") }}}}">Mon espace</a></li>'
+
     return f"""
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container-fluid">
@@ -33,7 +37,7 @@ def navbar_html(active=""):
             <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'accueil' else ''}" href="{{{{ url_for('accueil') }}}}">Accueil</a></li>
             <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'login' else ''}" href="{{{{ url_for('login') }}}}">Connexion</a></li>
             <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'formulaire' else ''}" href="{{{{ url_for('formulaire') }}}}">Inscription</a></li>
-            <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'mon_espace' else ''}" href="{{{{ url_for('mon_espace') }}}}">Mon espace</a></li>
+            {mon_espace_li}
             <li class="nav-item"><a class="nav-link {'active fw-bold' if active == 'contact' else ''}" href="{{{{ url_for('contact') }}}}">Nous contacter</a></li>
           </ul>
         </div>
@@ -696,6 +700,7 @@ def mon_espace():
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
+    {{ navbar|safe }}
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px;">
             <h2 class="text-center mb-4">Bienvenue {{ utilisateur["prenom"] }} 👋</h2>
@@ -717,7 +722,7 @@ def mon_espace():
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-""", utilisateur=utilisateur)
+""", utilisateur=utilisateur, navbar=navbar_html("mon_espace"))
 
 
 
@@ -748,6 +753,62 @@ def accueil():
 def logout():
     session.pop("user_email", None)
     return redirect(url_for('login'))
+
+
+
+
+@app.route('/accueil')
+def accueil():
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Accueil</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        {{ navbar|safe }}
+        <div class="container py-5">
+            <div class="text-center">
+                <h1>Bienvenue sur MonApp !</h1>
+                <p class="lead">Une application simple et efficace pour gérer vos données.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """, navbar=navbar_html("accueil"))
+
+@app.route('/contact')
+def contact():
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Nous contacter</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        {{ navbar|safe }}
+        <div class="container py-5">
+            <div class="card shadow p-4">
+                <h2 class="mb-3">Nous contacter</h2>
+                <p>Pour toute question ou suggestion, écrivez-nous à :</p>
+                <ul>
+                    <li>Email : support@monapp.fr</li>
+                    <li>Téléphone : +33 6 12 34 56 78</li>
+                </ul>
+            </div>
+        </div>
+    </body>
+    </html>
+    """, navbar=navbar_html("contact"))
+
+
+
 
 
 
