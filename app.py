@@ -727,28 +727,6 @@ def mon_espace():
 
 
 
-@app.route('/')
-def accueil():
-    return render_template_string("""
-    <head>
-      <meta charset="UTF-8">
-      <title>Accueil</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </head>
-    <body>
-      {{ navbar|safe }}
-      <div class="container mt-4">
-        <h1>Bienvenue sur MonApp !</h1>
-        <p>Application de gestion d’utilisateurs et de budget.</p>
-      </div>
-    </body>
-    """, navbar=navbar_html())
-
-
-
-
 @app.route('/logout')
 def logout():
     session.pop("user_email", None)
