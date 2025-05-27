@@ -73,6 +73,7 @@ def delete_data(table, id):
 
 def load_schema(table_name):
     schema_path = os.path.join("schemas", f"{table_name}.json")
+    print(">>> Recherche du schéma :", schema_path)  # Debug temporaire
     if not os.path.exists(schema_path):
         return None
     with open(schema_path, "r", encoding="utf-8") as f:

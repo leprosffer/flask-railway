@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from flask import Flask, render_template_string, request, redirect, url_for, session, Response
+from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages
 import session_manager
 import schema_manager
 import db_manager as file_manager
@@ -8,14 +8,16 @@ import data_validator
 import csv
 import io
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 app = Flask(__name__)
-app.secret_key = "secret_key_change_me"  # 🔒 pour sécuriser la session
+app.secret_key = os.getenv("SECRET_KEY")  # 🔒 pour sécuriser la session
 
 # Identifiants admin (modifiables)
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 
 
@@ -114,18 +116,18 @@ formulaire_html = """
 </html>
 """
 
-# ✅ Page d'accueil : formulaire dynamique
 @app.route('/', methods=['GET', 'POST'])
 def formulaire():
+    nom_table = session_manager.get_active_table()
+    if not nom_table:
+        return "⚠️ Aucune table active définie. Rendez-vous dans le panneau admin pour en sélectionner une."
+
+    schema = schema_manager.load_schema(nom_table)
+    print("SCHÉMA CHARGÉ :", schema)
+    if not schema:
+        return f"⚠️ Erreur : le schéma pour la table '{nom_table}' est introuvable. Vérifiez que 'schemas/{nom_table}.json' existe et contient la définition attendue."
+
     if request.method == 'POST':
-        nom_table = session_manager.get_active_table()
-        if not nom_table:
-            return "⚠️ Aucune table active définie."
-
-        schema = schema_manager.load_schema(nom_table)
-        if not schema:
-            return f"⚠️ Schéma introuvable pour la table '{nom_table}'."
-
         email = request.form["adresse_mail"]
         anciens = file_manager.load_data(nom_table)
 
@@ -147,7 +149,8 @@ def formulaire():
 
         validated = data_validator.validate_record(data, schema)
         file_manager.save_data(nom_table, anciens + [validated])
-        return f"✅ Données ajoutées à la table '{nom_table}' avec succès !"
+        flash("✅ Inscription réussie. Vous pouvez maintenant vous connecter.")
+        return redirect(url_for('login'))
 
     # Affichage du formulaire avec la navbar
     return render_template_string(formulaire_html, navbar=navbar_html("formulaire"))
@@ -463,7 +466,6 @@ def admin_add_user():
 
 
 
-
 @app.route('/admin/delete/<int:id>')
 def admin_delete_user(id):
     if not session.get('admin'):
@@ -478,7 +480,6 @@ def admin_delete_user(id):
         return redirect(url_for('admin_view_data'))
     else:
         return "❌ Erreur lors de la suppression de l'utilisateur."
-
 
 
 
@@ -632,17 +633,20 @@ def login():
         return "❌ Identifiants incorrects."
 
     return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
 <body class="bg-light">
     {{ navbar|safe }}
+
+    <!-- Affichage des messages flash -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="container mt-3">
+            <div class="alert alert-success text-center">
+                {{ messages[0] }}
+            </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
             <h2 class="text-center mb-4">🔐 Connexion utilisateur</h2>
@@ -865,7 +869,7 @@ conn.close()
 
 
 
-
+# Force redeploy
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

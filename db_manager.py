@@ -2,12 +2,22 @@ import sqlite3
 import os
 import json
 
-
 DB_PATH = "data.db"
+
+# -------------------------------
+# Connexion
+# -------------------------------
+
+def connect():
+    return sqlite3.connect(DB_PATH)
+
+# -------------------------------
+# Lecture des données
+# -------------------------------
 
 def load_data(table):
     table = table.strip()
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM {table}")
     rows = cur.fetchall()
@@ -15,15 +25,19 @@ def load_data(table):
     conn.close()
     return [dict(zip(columns, row)) for row in rows]
 
+# -------------------------------
+# Écriture (remplacement complet)
+# -------------------------------
+
 def save_data(table, data):
     table = table.strip()
     if not data:
         return
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cur = conn.cursor()
 
-    cur.execute(f"DELETE FROM {table}")
+    cur.execute(f"DELETE FROM {table}")  # Efface tout
 
     for record in data:
         champs = ", ".join(record.keys())
@@ -34,65 +48,87 @@ def save_data(table, data):
     conn.commit()
     conn.close()
 
-def delete_user_by_id(table, user_id):
+# -------------------------------
+# Insertion d’un enregistrement
+# -------------------------------
+
+def insert_data(table, record):
     table = table.strip()
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cur = conn.cursor()
-    cur.execute(f"DELETE FROM {table} WHERE id = ?", (user_id,))
+    champs = ", ".join(record.keys())
+    placeholders = ", ".join(["?"] * len(record))
+    cur.execute(f"INSERT INTO {table} ({champs}) VALUES ({placeholders})", tuple(record.values()))
     conn.commit()
     conn.close()
 
-def edit_user_by_id(table, user_id, new_data):
+# -------------------------------
+# Mise à jour d’un enregistrement
+# -------------------------------
+
+def update_data(table, user_id, new_data):
     table = table.strip()
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cur = conn.cursor()
-    keys = ", ".join([f"{k}=?" for k in new_data])
-    values = list(new_data.values()) + [user_id]
-    cur.execute(f"UPDATE {table} SET {keys} WHERE id = ?", values)
+    champs = ", ".join([f"{k}=?" for k in new_data.keys()])
+    valeurs = list(new_data.values())
+    valeurs.append(user_id)
+    cur.execute(f"UPDATE {table} SET {champs} WHERE id = ?", valeurs)
     conn.commit()
     conn.close()
+
+# -------------------------------
+# Suppression d’un utilisateur
+# -------------------------------
+
+def delete_user(table, user_id):
+    table = table.strip()
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(f"DELETE FROM {table} WHERE id = ?", (user_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Erreur lors de la suppression : {e}")
+        return False
+    finally:
+        conn.close()
+
+# -------------------------------
+# Récupération d’un utilisateur
+# -------------------------------
 
 def get_user_by_id(table, user_id):
     table = table.strip()
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cur = conn.cursor()
     cur.execute(f"SELECT * FROM {table} WHERE id = ?", (user_id,))
     row = cur.fetchone()
+    conn.close()
     if row:
         columns = [desc[0] for desc in cur.description]
         return dict(zip(columns, row))
     return None
 
-def add_user(table, data):
-    table = table.strip()
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    champs = ", ".join(data.keys())
-    valeurs = tuple(data.values())
-    placeholders = ", ".join(["?"] * len(valeurs))
-    cur.execute(f"INSERT INTO {table} ({champs}) VALUES ({placeholders})", valeurs)
-    conn.commit()
-    conn.close()
-
+# -------------------------------
+# Liste des tables
+# -------------------------------
 
 def list_tables():
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
     tables = [row[0] for row in cur.fetchall()]
     conn.close()
     return tables
 
-def delete_user(table, user_id):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    try:
-        cur.execute(f"DELETE FROM {table} WHERE id = ?", (user_id,))
-        conn.commit()
-        conn.close()
-        return True
-    except Exception as e:
-        conn.rollback()
-        conn.close()
-        print(f"Erreur lors de la suppression : {e}")
-        return False
+# -------------------------------
+# Schéma (stocké dans fichiers JSON)
+# -------------------------------
+
+def save_schema(table_name, schema):
+    schema_path = f"schemas/{table_name}.json"
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2, ensure_ascii=False)
