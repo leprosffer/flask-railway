@@ -11,13 +11,13 @@ import io
 from dotenv import load_dotenv
 
 load_dotenv()
+secret_key = os.getenv("SECRET_KEY")
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-print(f"SECRET_KEY: {SECRET_KEY}")  # Test temporaire
-
+if not secret_key:
+    raise ValueError("❌ SECRET_KEY est manquant dans le fichier .env")
 
 app = Flask(__name__)
-app.secret_key = SECRET_KEY # <- Ajoute bien cette ligne ici
+app.secret_key = secret_key
 if not secret_key:
     raise RuntimeError("❌ SECRET_KEY est manquant. Vérifie ton .env ou ta configuration Railway.")
 print(f"SECRET_KEY: {repr(app.secret_key)}")
@@ -623,25 +623,23 @@ def admin_import_csv():
 
 
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        mot_de_passe = request.form.get('mot_de_passe')
+        email = request.form.get('email', '').strip().lower()
+        mot_de_passe = request.form.get('mot_de_passe', '')
 
         if not email or not mot_de_passe:
             flash("Veuillez remplir tous les champs.", "warning")
             return redirect(url_for("login"))
 
-        email = email.strip().lower()
-        utilisateurs = file_manager.load_data("utilisateurs")
+        table = "utilisateurs"
+        utilisateurs = file_manager.load_data(table)
 
-        utilisateur = next((u for u in utilisateurs if u["email"].lower() == email), None)
-
-        if utilisateur:
-            mot_de_passe_hash = utilisateur.get("mot_de_passe", "")
-            if mot_de_passe_hash and check_password_hash(mot_de_passe_hash, mot_de_passe):
-                session["user_email"] = utilisateur["email"]
+        for user in utilisateurs:
+            if user["email"].strip().lower() == email and check_password_hash(user["mot_de_passe"], mot_de_passe):
+                session["user_email"] = email
                 return redirect(url_for('mon_espace'))
 
         flash("❌ Identifiants incorrects.", "danger")
@@ -707,30 +705,25 @@ def login():
 @app.route('/mon-espace', methods=['GET', 'POST'])
 def mon_espace():
     if "user_email" not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  # ← cette ligne doit être indentée !
 
     email = session["user_email"]
     table = "utilisateurs"
     data = file_manager.load_data(table)
+    utilisateur = next((u for u in data if u["email"].strip().lower() == email.strip().lower()), None)
 
-    # Vérification stricte de l'utilisateur en base (sécurité)
-   utilisateur = next((u for u in data if u["email"].strip().lower() == email.strip().lower()), None)
-if not utilisateur:
-    session.pop("user_email", None)
-    flash("Session invalide. Veuillez vous reconnecter.", "warning")
-    return redirect(url_for('login'))
+    if not utilisateur:
+        return "⚠️ Utilisateur introuvable."
 
     if request.method == 'POST':
         budget_str = request.form.get("budget")
         try:
             budget = float(budget_str)
         except ValueError:
-            flash("❌ Format de budget invalide.", "danger")
-            return redirect(url_for('mon_espace'))
+            return "❌ Format de budget invalide."
 
         utilisateur["budget"] = budget
         file_manager.save_data(table, data)
-        flash("Budget mis à jour avec succès.", "success")
         return redirect(url_for('mon_espace'))
 
     return render_template_string("""    
