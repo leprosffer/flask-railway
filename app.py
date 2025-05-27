@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import logging
 from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages, flash
 import session_manager
 import schema_manager
@@ -11,8 +12,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+print(f"SECRET_KEY: {SECRET_KEY}")  # Test temporaire
+
+
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")  # <- Ajoute bien cette ligne ici
+app.secret_key = SECRET_KEY # <- Ajoute bien cette ligne ici
+print(f"SECRET_KEY: {repr(app.secret_key)}")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 
@@ -620,12 +627,19 @@ def login():
         email = request.form.get('email')
         mot_de_passe = request.form.get('mot_de_passe')
 
-        table = "utilisateurs"
-        utilisateurs = file_manager.load_data(table)
+        if not email or not mot_de_passe:
+            flash("Veuillez remplir tous les champs.", "warning")
+            return redirect(url_for("login"))
 
-        for user in utilisateurs:
-            if user["email"] == email and check_password_hash(user["mot_de_passe"], mot_de_passe):
-                session["user_email"] = email
+        email = email.strip().lower()
+        utilisateurs = file_manager.load_data("utilisateurs")
+
+        utilisateur = next((u for u in utilisateurs if u["email"].lower() == email), None)
+
+        if utilisateur:
+            mot_de_passe_hash = utilisateur.get("mot_de_passe", "")
+            if mot_de_passe_hash and check_password_hash(mot_de_passe_hash, mot_de_passe):
+                session["user_email"] = utilisateur["email"]
                 return redirect(url_for('mon_espace'))
 
         flash("❌ Identifiants incorrects.", "danger")
@@ -659,7 +673,7 @@ def login():
 
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
-            <h2 class="text-center mb-4">🔐 Connexion utilisateur</h2>
+            <h2 class="text-center mb-4">&#128272; Connexion utilisateur</h2>
             <form method="POST">
                 <div class="mb-3">
                     <label for="email" class="form-label">Adresse email</label>
@@ -697,19 +711,25 @@ def mon_espace():
     table = "utilisateurs"
     data = file_manager.load_data(table)
 
-    utilisateur = next((u for u in data if u["email"] == email), None)
+    # Vérification stricte de l'utilisateur en base (sécurité)
+    utilisateur = next((u for u in data if u["email"].strip().lower() == email.strip().lower()), None)
+    
     if not utilisateur:
-        return "⚠️ Utilisateur introuvable."
+        session.pop("user_email", None)
+        flash("Session invalide. Veuillez vous reconnecter.", "warning")
+        return redirect(url_for('login'))
 
     if request.method == 'POST':
         budget_str = request.form.get("budget")
         try:
             budget = float(budget_str)
         except ValueError:
-            return "❌ Format de budget invalide."
+            flash("❌ Format de budget invalide.", "danger")
+            return redirect(url_for('mon_espace'))
 
         utilisateur["budget"] = budget
         file_manager.save_data(table, data)
+        flash("Budget mis à jour avec succès.", "success")
         return redirect(url_for('mon_espace'))
 
     return render_template_string("""    
@@ -724,6 +744,20 @@ def mon_espace():
 </head>
 <body class="bg-light">
     {{ navbar|safe }}
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mt-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} text-center">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px;">
             <h2 class="text-center mb-4">Bienvenue {{ utilisateur["prenom"] }} 👋</h2>
