@@ -18,6 +18,8 @@ print(f"SECRET_KEY: {SECRET_KEY}")  # Test temporaire
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY # <- Ajoute bien cette ligne ici
+if not secret_key:
+    raise RuntimeError("❌ SECRET_KEY est manquant. Vérifie ton .env ou ta configuration Railway.")
 print(f"SECRET_KEY: {repr(app.secret_key)}")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
@@ -712,12 +714,11 @@ def mon_espace():
     data = file_manager.load_data(table)
 
     # Vérification stricte de l'utilisateur en base (sécurité)
-    utilisateur = next((u for u in data if u["email"].strip().lower() == email.strip().lower()), None)
-    
-    if not utilisateur:
-        session.pop("user_email", None)
-        flash("Session invalide. Veuillez vous reconnecter.", "warning")
-        return redirect(url_for('login'))
+   utilisateur = next((u for u in data if u["email"].strip().lower() == email.strip().lower()), None)
+if not utilisateur:
+    session.pop("user_email", None)
+    flash("Session invalide. Veuillez vous reconnecter.", "warning")
+    return redirect(url_for('login'))
 
     if request.method == 'POST':
         budget_str = request.form.get("budget")
