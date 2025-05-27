@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")  # <-- Obligatoire pour éviter l'erreur de session
+app.secret_key = os.getenv("SECRET_KEY")  # <- Ajoute bien cette ligne ici
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 
