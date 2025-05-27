@@ -1,6 +1,6 @@
+from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
-from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages
+from dotenv import load_dotenv
 import session_manager
 import schema_manager
 import db_manager as file_manager
@@ -8,9 +8,9 @@ import data_validator
 import csv
 import io
 import os
-from dotenv import load_dotenv
+
+# Chargement des variables d'environnement
 load_dotenv()
-import os
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")  # 🔒 pour sécuriser la session
@@ -616,6 +616,8 @@ def admin_import_csv():
 
 
 
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -630,25 +632,37 @@ def login():
                 session["user_email"] = email
                 return redirect(url_for('mon_espace'))
 
-        return "❌ Identifiants incorrects."
+        flash("❌ Identifiants incorrects.", "danger")
+        return redirect(url_for("login"))
 
     return render_template_string("""
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 <body class="bg-light">
     {{ navbar|safe }}
 
     <!-- Affichage des messages flash -->
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="container mt-3">
-            <div class="alert alert-success text-center">
-                {{ messages[0] }}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} text-center">
+              {{ message }}
             </div>
+          {% endfor %}
         </div>
       {% endif %}
     {% endwith %}
 
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
+        <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
             <h2 class="text-center mb-4">🔐 Connexion utilisateur</h2>
             <form method="POST">
                 <div class="mb-3">
