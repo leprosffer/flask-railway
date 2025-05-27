@@ -1,22 +1,18 @@
-from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from dotenv import load_dotenv
+import os
+from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages, flash
 import session_manager
 import schema_manager
 import db_manager as file_manager
 import data_validator
 import csv
 import io
-import os
+from dotenv import load_dotenv
 
-# Chargement des variables d'environnement
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")  # 🔒 pour sécuriser la session
-
-# Identifiants admin (modifiables)
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+app.secret_key = os.getenv("SECRET_KEY")  # <-- Obligatoire pour éviter l'erreur de session
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 
