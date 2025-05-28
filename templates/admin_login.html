@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion Admin{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+    <div class="card shadow p-4 w-100" style="max-width: 400px;">
+        <h2 class="text-center mb-4">Connexion Admin</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label">Nom d'utilisateur</label>
+                <input type="text" class="form-control" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Mot de passe</label>
+                <input type="password" class="form-control" name="password" required>
+            </div>
+            <div class="d-grid">
+                <input type="submit" value="Connexion" class="btn btn-success">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
