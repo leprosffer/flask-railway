@@ -55,7 +55,11 @@ def send_email(to, subject, body):
         print(f"Erreur lors de l'envoi du mail : {e}")
 
 file_manager.add_missing_columns("utilisateurs", {
-    "email_confirmed": "BOOLEAN DEFAULT 0"
+    "nom": "TEXT",
+    "prenom": "TEXT",
+    "genre": "TEXT",
+    "adresse_mail": "TEXT",
+    "mot_de_passe": "TEXT"
 })
 
 

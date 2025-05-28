@@ -5,4 +5,5 @@
   "email": "email",
   "mot_de_passe": "password",
   "budget": "float"
+  "email_confirmed": "boolean"
 }
