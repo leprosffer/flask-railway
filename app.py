@@ -30,14 +30,13 @@ if not app.config['SECRET_KEY']:
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # --- Configuration de Flask-Mail (une seule fois) ---
-app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.mailgun.org")
-app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
-app.config["MAIL_USE_SSL"] = os.getenv("MAIL_USE_SSL", "false").lower() == "true"
-app.config["MAIL_DEFAULT_SENDER"] = app.config["MAIL_USERNAME"]
-app.config['MAIL_DEFAULT_SENDER'] = app.config["MAIL_USERNAME"]
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS') == 'true'
+app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL') == 'true'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')  # <-- Ajoute cette ligne
 
 mail = Mail(app)
 
