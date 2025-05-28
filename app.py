@@ -17,8 +17,6 @@ import data_validator
 
 from db_manager import add_missing_columns
 
-add_missing_columns()  # à exécuter une seule fois au déploiement
-
 # --- Chargement des variables d’environnement ---
 load_dotenv()
 
@@ -29,6 +27,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 if not app.config['SECRET_KEY']:
     raise ValueError("❌ SECRET_KEY est manquant dans le fichier .env")
+
+# Appel pour ajouter la colonne si nécessaire
+add_missing_columns()
 
 # --- Initialisation du système de tokens sécurisés ---
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
