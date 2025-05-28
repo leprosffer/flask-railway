@@ -18,10 +18,6 @@ import data_validator
 # --- Chargement des variables d’environnement ---
 load_dotenv()
 
-file_manager.add_missing_columns("utilisateurs", {
-    "email_confirmed": "BOOLEAN DEFAULT 0"
-})
-
 # --- Initialisation de Flask ---
 app = Flask(__name__)
 
@@ -57,6 +53,12 @@ def send_email(to, subject, body):
         mail.send(msg)
     except Exception as e:
         print(f"Erreur lors de l'envoi du mail : {e}")
+
+file_manager.add_missing_columns("utilisateurs", {
+    "email_confirmed": "BOOLEAN DEFAULT 0"
+})
+
+
 
 # --- Gestion des tokens de confirmation d’email ---
 def generate_confirmation_token(email):
