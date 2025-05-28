@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Formulaire d'inscription{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+    <div class="card shadow p-4 w-100" style="max-width: 500px;">
+        <h2 class="text-center mb-4">Formulaire d'inscription</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nom" class="form-label">Nom</label>
+                <input type="text" name="nom" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="prenom" class="form-label">Prénom</label>
+                <input type="text" name="prenom" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="genre" class="form-label">Genre</label>
+                <select name="genre" class="form-select" required>
+                    <option value="">Sélectionner</option>
+                    <option value="Homme">Homme</option>
+                    <option value="Femme">Femme</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="adresse_mail" class="form-label">Adresse mail</label>
+                <input type="email" name="adresse_mail" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                <input type="password" name="mot_de_passe" class="form-control" required>
+            </div>
+            <div class="d-grid">
+                <input type="submit" value="Envoyer" class="btn btn-primary">
+            </div>
+        </form>
+        <p class="mt-3 text-center">Déjà inscrit ? <a href="{{ url_for('login') }}">Se connecter ici</a></p>
+    </div>
+</div>
+{% endblock %}

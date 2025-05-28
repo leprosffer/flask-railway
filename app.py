@@ -223,7 +223,7 @@ def formulaire():
         flash("✅ Inscription réussie. Veuillez vérifier votre adresse email pour activer votre compte.", "success")
         return redirect(url_for('login'))
 
-    return render_template_string(formulaire_html, navbar=navbar_html("formulaire"))
+    return render_template("formulaire.html")
 
 # ✅ Page pour choisir une table active
 @app.route('/choisir', methods=['GET', 'POST'])
