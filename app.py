@@ -15,6 +15,10 @@ import schema_manager
 import db_manager as file_manager
 import data_validator
 
+from db_manager import add_missing_columns
+
+add_missing_columns()  # à exécuter une seule fois au déploiement
+
 # --- Chargement des variables d’environnement ---
 load_dotenv()
 
