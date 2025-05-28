@@ -25,6 +25,29 @@ def load_data(table):
     conn.close()
     return [dict(zip(columns, row)) for row in rows]
 
+
+
+
+
+def add_missing_columns(table_name, required_columns):
+    conn = connect()
+    cur = conn.cursor()
+
+    # Récupérer les colonnes existantes
+    cur.execute(f"PRAGMA table_info({table_name})")
+    existing_columns = [row[1] for row in cur.fetchall()]
+
+    # Ajouter les colonnes manquantes
+    for col, col_type in required_columns.items():
+        if col not in existing_columns:
+            cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {col} {col_type}")
+
+    conn.commit()
+    conn.close()
+
+
+
+
 # -------------------------------
 # Écriture (remplacement complet)
 # -------------------------------
