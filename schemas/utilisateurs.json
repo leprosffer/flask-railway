@@ -4,6 +4,6 @@
   "genre": "string",
   "email": "email",
   "mot_de_passe": "password",
-  "budget": "float"
+  "budget": "float",
   "email_confirmed": "boolean"
 }
