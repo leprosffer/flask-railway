@@ -108,9 +108,6 @@ def navbar_html(active=""):
 
 
 
-
-
-
 # 🧾 HTML pour le formulaire d'inscription
 formulaire_html = """
 <!DOCTYPE html>
@@ -173,18 +170,24 @@ def formulaire():
         return "⚠️ Aucune table active définie. Rendez-vous dans le panneau admin pour en sélectionner une."
 
     schema = schema_manager.load_schema(nom_table)
-    print("SCHÉMA CHARGÉ :", schema)
     if not schema:
-        return f"⚠️ Erreur : le schéma pour la table '{nom_table}' est introuvable. Vérifiez que 'schemas/{nom_table}.json' existe et contient la définition attendue."
+        return f"⚠️ Erreur : le schéma pour la table '{nom_table}' est introuvable."
 
     if request.method == 'POST':
-        email = request.form["adresse_mail"]
+        email = request.form["adresse_mail"].strip().lower()
+
+        # Vérifier email format
+        if not is_valid_email(email):
+            flash("❌ Adresse email invalide.", "danger")
+            return redirect(url_for('formulaire'))
+
         anciens = file_manager.load_data(nom_table)
 
         # Vérification d'unicité de l'adresse email
         for utilisateur in anciens:
             if utilisateur.get("email") == email:
-                return "⚠️ Cette adresse e-mail est déjà utilisée."
+                flash("⚠️ Cette adresse e-mail est déjà utilisée.", "warning")
+                return redirect(url_for("formulaire"))
 
         mot_de_passe = request.form["mot_de_passe"]
         mot_de_passe_hash = generate_password_hash(mot_de_passe)
@@ -194,15 +197,21 @@ def formulaire():
             "prenom": request.form["prenom"],
             "genre": request.form["genre"],
             "email": email,
-            "mot_de_passe": mot_de_passe_hash
+            "mot_de_passe": mot_de_passe_hash,
+            "email_confirmed": False  # Ajout important
         }
 
         validated = data_validator.validate_record(data, schema)
         file_manager.save_data(nom_table, anciens + [validated])
-        flash("✅ Inscription réussie. Vous pouvez maintenant vous connecter.")
+
+        # Génération du token et envoi d’email
+        token = generate_confirmation_token(email)
+        lien = url_for("confirm_email", token=token, _external=True)
+        send_email(email, "Confirmation de votre adresse", f"Confirmez votre adresse en cliquant ici : {lien}")
+
+        flash("✅ Inscription réussie. Veuillez vérifier votre adresse email pour activer votre compte.", "success")
         return redirect(url_for('login'))
 
-    # Affichage du formulaire avec la navbar
     return render_template_string(formulaire_html, navbar=navbar_html("formulaire"))
 
 # ✅ Page pour choisir une table active
@@ -684,7 +693,14 @@ def login():
 
         for user in utilisateurs:
             if user["email"].strip().lower() == email and check_password_hash(user["mot_de_passe"], mot_de_passe):
+
+                # Vérifie si l'email a été confirmé
+                if not user.get("email_confirmed", False):
+                    flash("❌ Adresse email non confirmée. Veuillez vérifier votre boîte mail.", "danger")
+                    return redirect(url_for("login"))
+
                 session["user_email"] = email
+                flash("✅ Connexion réussie.", "success")
                 return redirect(url_for('mon_espace'))
 
         flash("❌ Identifiants incorrects.", "danger")
@@ -750,7 +766,7 @@ def login():
 @app.route('/mon-espace', methods=['GET', 'POST'])
 def mon_espace():
     if "user_email" not in session:
-        return redirect(url_for('login'))  # ← cette ligne doit être indentée !
+        return redirect(url_for('login'))
 
     email = session["user_email"]
     table = "utilisateurs"
@@ -760,18 +776,25 @@ def mon_espace():
     if not utilisateur:
         return "⚠️ Utilisateur introuvable."
 
+    # Sécurité : Vérifier que l'email a bien été confirmé
+    if not utilisateur.get("email_confirmed", False):
+        flash("⚠️ Votre adresse email n’a pas été confirmée. Veuillez vérifier vos emails.", "danger")
+        return redirect(url_for("login"))
+
     if request.method == 'POST':
         budget_str = request.form.get("budget")
         try:
             budget = float(budget_str)
         except ValueError:
-            return "❌ Format de budget invalide."
+            flash("❌ Format de budget invalide.", "danger")
+            return redirect(url_for('mon_espace'))
 
         utilisateur["budget"] = budget
         file_manager.save_data(table, data)
+        flash("✅ Budget mis à jour avec succès.", "success")
         return redirect(url_for('mon_espace'))
 
-    return render_template_string("""    
+    return render_template_string("""
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -826,15 +849,22 @@ def mon_espace():
 
 
 
-@app.route('/confirm_email/<token>')
+@app.route("/confirm_email/<token>")
 def confirm_email(token):
-    try:
-        email = serializer.loads(token, salt='email-confirm', max_age=3600)
-        # Marquer l'email comme confirmé en base
-        # Exemple : cur.execute('UPDATE utilisateurs SET confirme=1 WHERE email=?', (email,))
-        return redirect(url_for('connexion', message='Email confirmé, vous pouvez vous connecter.'))
-    except (SignatureExpired, BadSignature):
-        return 'Le lien est invalide ou expiré.'
+    email = confirm_token(token)
+    if not email:
+        flash("❌ Lien invalide ou expiré.", "danger")
+        return redirect(url_for("login"))
+
+    utilisateurs = file_manager.load_data("utilisateurs")
+    for user in utilisateurs:
+        if user["email"] == email:
+            user["email_confirmed"] = True
+            break
+    file_manager.save_data("utilisateurs", utilisateurs)
+
+    flash("✅ Adresse email confirmée. Vous pouvez maintenant vous connecter.", "success")
+    return redirect(url_for("login"))
 @app.route('/logout')
 def logout():
     session.pop("user_email", None)
