@@ -1,29 +1,74 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import logging
+import re
+import csv
+import io
+
 from flask import Flask, render_template_string, request, redirect, url_for, session, Response, get_flashed_messages, flash
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+from dotenv import load_dotenv
+
 import session_manager
 import schema_manager
 import db_manager as file_manager
 import data_validator
-import csv
-import io
-from dotenv import load_dotenv
 
+# --- Chargement des variables d’environnement ---
 load_dotenv()
-secret_key = os.getenv("SECRET_KEY")
 
-if not secret_key:
+# --- Initialisation de Flask ---
+app = Flask(__name__)
+
+# --- Configuration sécurisée de Flask ---
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+if not app.config['SECRET_KEY']:
     raise ValueError("❌ SECRET_KEY est manquant dans le fichier .env")
 
-app = Flask(__name__)
-app.secret_key = secret_key
-if not secret_key:
-    raise RuntimeError("❌ SECRET_KEY est manquant. Vérifie ton .env ou ta configuration Railway.")
-print(f"SECRET_KEY: {repr(app.secret_key)}")
+# --- Initialisation du système de tokens sécurisés ---
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+# --- Configuration de Flask-Mail (une seule fois) ---
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.mailgun.org")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
+app.config["MAIL_USE_SSL"] = os.getenv("MAIL_USE_SSL", "false").lower() == "true"
+
+mail = Mail(app)
+
+# --- Vérification basique du format de l'email ---
+def is_valid_email(email):
+    pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    return re.match(pattern, email)
+
+# --- Fonction d’envoi d’email sécurisé ---
+def send_email(to, subject, body):
+    try:
+        msg = Message(subject, sender=app.config["MAIL_USERNAME"], recipients=[to])
+        msg.body = body
+        mail.send(msg)
+    except Exception as e:
+        print(f"Erreur lors de l'envoi du mail : {e}")
+
+# --- Gestion des tokens de confirmation d’email ---
+def generate_confirmation_token(email):
+    return serializer.dumps(email, salt="email-confirmation")
+
+def confirm_token(token, expiration=3600):
+    try:
+        return serializer.loads(token, salt="email-confirmation", max_age=expiration)
+    except Exception:
+        return False
+
+# --- Configuration Admin ---
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
+# --- Affichage du SECRET_KEY (optionnel pour debug uniquement) ---
+print(f"SECRET_KEY chargé : {repr(app.config['SECRET_KEY'])}")
 
 
 
@@ -779,6 +824,17 @@ def mon_espace():
 
 
 
+
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = serializer.loads(token, salt='email-confirm', max_age=3600)
+        # Marquer l'email comme confirmé en base
+        # Exemple : cur.execute('UPDATE utilisateurs SET confirme=1 WHERE email=?', (email,))
+        return redirect(url_for('connexion', message='Email confirmé, vous pouvez vous connecter.'))
+    except (SignatureExpired, BadSignature):
+        return 'Le lien est invalide ou expiré.'
 @app.route('/logout')
 def logout():
     session.pop("user_email", None)
@@ -907,7 +963,18 @@ conn.close()
 
 
 
-# Force redeploy
+#@app.route("/confirm_email/<token>")
+#def confirm_email(token):
+ #   email = confirm_token(token)
+  #  if not email:
+   #     flash("⛔ Le lien de confirmation est invalide ou expiré.")
+    #    return redirect(url_for("connexion"))
+    #session["email_confirmed"] = True
+    #flash("✅ Adresse email confirmée avec succès. Vous pouvez vous connecter.")
+    #return redirect(url_for("connexion"))
+
+
+# --- Bloc de lancement Flask ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
