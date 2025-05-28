@@ -120,59 +120,59 @@ def navbar_html(active=""):
 
 
 # 🧾 HTML pour le formulaire d'inscription
-formulaire_html = """
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Formulaire d'inscription</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    {{ navbar|safe }}
-    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
-        <div class="card shadow p-4 w-100" style="max-width: 500px;">
-            <h2 class="text-center mb-4">Formulaire d'inscription</h2>
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="nom" class="form-label">Nom</label>
-                    <input type="text" name="nom" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="prenom" class="form-label">Prénom</label>
-                    <input type="text" name="prenom" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="genre" class="form-label">Genre</label>
-                    <select name="genre" class="form-select" required>
-                        <option value="">Sélectionner</option>
-                        <option value="Homme">Homme</option>
-                        <option value="Femme">Femme</option>
-                        <option value="Autre">Autre</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="adresse_mail" class="form-label">Adresse mail</label>
-                    <input type="email" name="adresse_mail" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="mot_de_passe" class="form-label">Mot de passe</label>
-                    <input type="password" name="mot_de_passe" class="form-control" required>
-                </div>
-                <div class="d-grid">
-                    <input type="submit" value="Envoyer" class="btn btn-primary">
-                </div>
-            </form>
-            <p class="mt-3 text-center">Déjà inscrit ? <a href="{{ url_for('login') }}">Se connecter ici</a></p>
-        </div>
-    </div>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-"""
+#formulaire_html = """
+#<!DOCTYPE html>
+#<html lang="fr">
+#<head>
+ #   <meta charset="UTF-8">
+  #  <title>Formulaire d'inscription</title>
+   # <meta name="viewport" content="width=device-width, initial-scale=1">
+    #<!-- Bootstrap CSS -->
+    #<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+#</head>
+#<body class="bg-light">
+ #   {{ navbar|safe }}
+  #  <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+   #     <div class="card shadow p-4 w-100" style="max-width: 500px;">
+    #        <h2 class="text-center mb-4">Formulaire d'inscription</h2>
+     #       <form method="POST">
+      #          <div class="mb-3">
+       #             <label for="nom" class="form-label">Nom</label>
+        #            <input type="text" name="nom" class="form-control" required>
+         #       </div>
+          #      <div class="mb-3">
+           #         <label for="prenom" class="form-label">Prénom</label>
+            #        <input type="text" name="prenom" class="form-control" required>
+             #   </div>
+              #  <div class="mb-3">
+               #     <label for="genre" class="form-label">Genre</label>
+                #    <select name="genre" class="form-select" required>
+                 #       <option value="">Sélectionner</option>
+                  #      <option value="Homme">Homme</option>
+                   #     <option value="Femme">Femme</option>
+                    #    <option value="Autre">Autre</option>
+                    #</select>
+                #</div>
+                #<div class="mb-3">
+                 #   <label for="adresse_mail" class="form-label">Adresse mail</label>
+                  #  <input type="email" name="adresse_mail" class="form-control" required>
+                #</div>
+                #<div class="mb-3">
+                 #   <label for="mot_de_passe" class="form-label">Mot de passe</label>
+                  #  <input type="password" name="mot_de_passe" class="form-control" required>
+                #</div>
+                #<div class="d-grid">
+                 #   <input type="submit" value="Envoyer" class="btn btn-primary">
+                #</div>
+            #</form>
+            #<p class="mt-3 text-center">Déjà inscrit ? <a href="{{ url_for('login') }}">Se connecter ici</a></p>
+        #</div>
+    #</div>
+    #<!-- Bootstrap JS -->
+    #<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+#</body>
+#</html>
+#"""
 
 @app.route('/', methods=['GET', 'POST'])
 def formulaire():
@@ -223,7 +223,7 @@ def formulaire():
         flash("✅ Inscription réussie. Veuillez vérifier votre adresse email pour activer votre compte.", "success")
         return redirect(url_for('login'))
 
-    return render_template("formulaire.html")
+    return render_template("formulaire.html", active="formulaire")
 
 # ✅ Page pour choisir une table active
 @app.route('/choisir', methods=['GET', 'POST'])
@@ -270,42 +270,43 @@ def admin_login():
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session['admin'] = True
             return redirect(url_for('admin_dashboard'))
-        return "❌ Identifiants incorrects."
-    
-    return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion Admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
-        <div class="card shadow p-4 w-100" style="max-width: 400px;">
-            <h2 class="text-center mb-4">Connexion Admin</h2>
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Nom d'utilisateur</label>
-                    <input type="text" class="form-control" name="username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Mot de passe</label>
-                    <input type="password" class="form-control" name="password" required>
-                </div>
-                <div class="d-grid">
-                    <input type="submit" value="Connexion" class="btn btn-success">
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-""")
+        flash("❌ Identifiants incorrects.", "danger")
+        return redirect(url_for('admin_login'))
+
+    return render_template("admin_login.html", active="admin")
+#<!DOCTYPE html>
+#<html lang="fr">
+#<head>
+#    <meta charset="UTF-8">
+ #   <title>Connexion Admin</title>
+  #  <meta name="viewport" content="width=device-width, initial-scale=1">
+   # <!-- Bootstrap CSS -->
+    #<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+#</head>
+#<body class="bg-light">
+ #   <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+  #      <div class="card shadow p-4 w-100" style="max-width: 400px;">
+   #         <h2 class="text-center mb-4">Connexion Admin</h2>
+    #        <form method="POST">
+     #           <div class="mb-3">
+      #              <label for="username" class="form-label">Nom d'utilisateur</label>
+       #             <input type="text" class="form-control" name="username" required>
+        #        </div>
+         #       <div class="mb-3">
+          #          <label for="password" class="form-label">Mot de passe</label>
+           #         <input type="password" class="form-control" name="password" required>
+            #    </div>
+             #   <div class="d-grid">
+              #      <input type="submit" value="Connexion" class="btn btn-success">
+               # </div>
+            #</form>
+        #</div>
+    #</div>
+    #<!-- Bootstrap JS -->
+    #<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+#</body>
+#</html>
+#""")
 
 @app.route('/admin')
 def admin_dashboard():
