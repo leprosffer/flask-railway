@@ -15,6 +15,8 @@ import schema_manager
 import db_manager as file_manager
 import data_validator
 
+from datetime import datetime
+
 # --- Chargement des variables d’environnement ---
 load_dotenv()
 
@@ -842,7 +844,6 @@ def login():
 
 
 
-
 @app.route('/mon-espace', methods=['GET', 'POST'])
 def mon_espace():
     if "user_email" not in session:
@@ -860,20 +861,121 @@ def mon_espace():
         flash("⚠️ Votre adresse email n’a pas été confirmée. Veuillez vérifier vos emails.", "danger")
         return redirect(url_for("login"))
 
+    utilisateur.setdefault("budget", 0)
+    utilisateur.setdefault("depenses", [])
+    utilisateur.setdefault("economies", 0)
+    utilisateur.setdefault("historique_economies", [])
+    utilisateur.setdefault("investissements", [])
+
     if request.method == 'POST':
-        budget_str = request.form.get("budget")
-        try:
-            budget = float(budget_str)
-        except ValueError:
-            flash("❌ Format de budget invalide.", "danger")
-            return redirect(url_for('mon_espace'))
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        utilisateur["budget"] = budget
-        file_manager.save_data(table, data)
-        flash("✅ Budget mis à jour avec succès.", "success")
-        return redirect(url_for('mon_espace'))
+        # Budget
+        if "budget" in request.form:
+            try:
+                budget = float(request.form.get("budget"))
+                utilisateur["budget"] = budget
+                file_manager.save_data(table, data)
+                flash(f"✅ Budget mis à jour avec succès ({now}).", "success")
+            except ValueError:
+                flash("❌ Format de budget invalide.", "danger")
 
-    return render_template("mon_espace.html", utilisateur=utilisateur, active="mon_espace")
+        # Dépenses
+        elif all(key in request.form for key in ("montant", "categorie", "date")):
+            try:
+                montant = float(request.form.get("montant"))
+                categorie = request.form.get("categorie")
+                date = request.form.get("date")
+
+                total_depense = sum(d["montant"] for d in utilisateur["depenses"])
+                if total_depense + montant > utilisateur["budget"]:
+                    flash("⚠️ Cette dépense dépasse votre budget.", "danger")
+                else:
+                    utilisateur["depenses"].append({
+                        "montant": montant,
+                        "categorie": categorie,
+                        "date": date,
+                        "heure": now
+                    })
+                    file_manager.save_data(table, data)
+                    flash(f"✅ Dépense ajoutée ({now}).", "success")
+            except Exception:
+                flash("❌ Erreur lors de l'ajout de la dépense.", "danger")
+
+        # Épargne
+        elif "epargne" in request.form:
+            try:
+                somme = float(request.form.get("epargne"))
+                if somme > utilisateur["budget"]:
+                    flash("⚠️ Vous ne pouvez pas épargner plus que votre budget.", "danger")
+                else:
+                    utilisateur["budget"] -= somme
+                    utilisateur["economies"] += somme
+                    utilisateur["historique_economies"].append({
+                        "action": "ajout",
+                        "montant": somme,
+                        "date": now
+                    })
+                    file_manager.save_data(table, data)
+                    flash(f"✅ Vous avez économisé {somme} € le {now}.", "success")
+            except Exception:
+                flash("❌ Format invalide pour l'épargne.", "danger")
+
+        elif "retirer_epargne" in request.form:
+            try:
+                montant = float(request.form.get("retirer_epargne"))
+                if montant > utilisateur["economies"]:
+                    flash("⚠️ Pas assez d'économies.", "danger")
+                else:
+                    utilisateur["budget"] += montant
+                    utilisateur["economies"] -= montant
+                    utilisateur["historique_economies"].append({
+                        "action": "retrait",
+                        "montant": montant,
+                        "date": now
+                    })
+                    file_manager.save_data(table, data)
+                    flash(f"✅ Vous avez réintroduit {montant} € depuis vos économies ({now}).", "success")
+            except Exception:
+                flash("❌ Format invalide pour le retrait.", "danger")
+
+        # Investissement
+        elif "montant_investi" in request.form and "domaine_investissement" in request.form:
+            try:
+                montant = float(request.form.get("montant_investi"))
+                domaine = request.form.get("domaine_investissement")
+                if montant > utilisateur["budget"]:
+                    flash("⚠️ Montant supérieur au budget disponible.", "danger")
+                else:
+                    utilisateur["budget"] -= montant
+                    utilisateur["investissements"].append({
+                        "montant": montant,
+                        "domaine": domaine,
+                        "date": now
+                    })
+                    file_manager.save_data(table, data)
+                    flash(f"✅ Investissement de {montant} € dans {domaine} effectué ({now}).", "success")
+            except Exception:
+                flash("❌ Format invalide pour l'investissement.", "danger")
+
+        return redirect(url_for("mon_espace"))
+
+    # Graphique dépenses
+    depenses = utilisateur["depenses"]
+    montants_dep = [d["montant"] for d in depenses]
+    categories = [d["categorie"] for d in depenses]
+    dates_dep = [d["date"] for d in depenses]
+
+    # Graphique investissements
+    investissements = utilisateur["investissements"]
+    montants_inv = [i["montant"] for i in investissements]
+    domaines_inv = [i["domaine"] for i in investissements]
+    dates_inv = [i["date"] for i in investissements]
+
+    return render_template("mon_espace.html", utilisateur=utilisateur,
+                           montants=montants_dep, categories=categories, dates=dates_dep,
+                           montants_inv=montants_inv, domaines_inv=domaines_inv, dates_inv=dates_inv,
+                           active="mon_espace")
 #<!DOCTYPE html>
 #<html lang="fr">
 #<head>
