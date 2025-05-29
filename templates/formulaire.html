@@ -1,42 +1,60 @@
 {% extends "base.html" %}
-
-{% block title %}Formulaire d'inscription{% endblock %}
+{% block title %}Inscription{% endblock %}
 
 {% block content %}
-<div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
-    <div class="card shadow p-4 w-100" style="max-width: 500px;">
-        <h2 class="text-center mb-4">Formulaire d'inscription</h2>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-4 w-100" style="max-width: 600px;">
+        <h2 class="text-center mb-4">Créer un compte</h2>
+
+        <!-- Messages flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} text-center">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <form method="POST">
-            <div class="mb-3">
-                <label for="nom" class="form-label">Nom</label>
-                <input type="text" name="nom" class="form-control" required>
+            <div class="row">
+                <div class="mb-3 col-md-6">
+                    <label for="nom" class="form-label">Nom</label>
+                    <input type="text" name="nom" id="nom" class="form-control" required>
+                </div>
+                <div class="mb-3 col-md-6">
+                    <label for="prenom" class="form-label">Prénom</label>
+                    <input type="text" name="prenom" id="prenom" class="form-control" required>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="prenom" class="form-label">Prénom</label>
-                <input type="text" name="prenom" class="form-control" required>
-            </div>
+
             <div class="mb-3">
                 <label for="genre" class="form-label">Genre</label>
-                <select name="genre" class="form-select" required>
-                    <option value="">Sélectionner</option>
+                <select name="genre" id="genre" class="form-select" required>
+                    <option value="">-- Sélectionnez --</option>
                     <option value="Homme">Homme</option>
                     <option value="Femme">Femme</option>
                     <option value="Autre">Autre</option>
                 </select>
             </div>
+
             <div class="mb-3">
-                <label for="adresse_mail" class="form-label">Adresse mail</label>
-                <input type="email" name="adresse_mail" class="form-control" required>
+                <label for="adresse_mail" class="form-label">Adresse e-mail</label>
+                <input type="email" name="adresse_mail" id="adresse_mail" class="form-control" required>
             </div>
+
             <div class="mb-3">
                 <label for="mot_de_passe" class="form-label">Mot de passe</label>
-                <input type="password" name="mot_de_passe" class="form-control" required>
+                <input type="password" name="mot_de_passe" id="mot_de_passe" class="form-control" required>
             </div>
-            <div class="d-grid">
-                <input type="submit" value="Envoyer" class="btn btn-primary">
-            </div>
+
+            <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
         </form>
-        <p class="mt-3 text-center">Déjà inscrit ? <a href="{{ url_for('login') }}">Se connecter ici</a></p>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('login') }}">Déjà un compte ? Se connecter</a>
+        </div>
     </div>
 </div>
 {% endblock %}

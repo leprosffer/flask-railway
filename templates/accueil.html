@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5 text-center">
+  <h1>Bienvenue sur votre application 👋</h1>
+  <p class="lead mt-3">
+    Naviguez avec le menu pour gérer vos utilisateurs, consulter vos données et plus encore.
+  </p>
+  <a href="{{ url_for('login') }}" class="btn btn-primary mt-4">Connexion</a>
+</div>
+{% endblock %}

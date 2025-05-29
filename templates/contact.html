@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5" style="max-width: 600px;">
+  <h2>📬 Nous contacter</h2>
+  <p>Pour toute question ou assistance, vous pouvez nous écrire à :</p>
+  <address>
+    <strong>Support Client</strong><br />
+    support@example.com<br />
+    Téléphone : 01 23 45 67 89
+  </address>
+  <p>Ou utiliser notre formulaire en ligne :</p>
+  <form>
+    <div class="mb-3">
+      <label for="nom" class="form-label">Nom</label>
+      <input type="text" class="form-control" id="nom" required>
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Adresse Email</label>
+      <input type="email" class="form-control" id="email" required>
+    </div>
+    <div class="mb-3">
+      <label for="message" class="form-label">Message</label>
+      <textarea class="form-control" id="message" rows="5" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Envoyer</button>
+  </form>
+</div>
+{% endblock %}

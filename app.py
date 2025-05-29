@@ -315,62 +315,62 @@ def admin_dashboard():
 
     tables = file_manager.list_tables()
     active_table = session_manager.get_active_table()
+    
+    return render_template("admin_dashboard.html", tables=tables, active_table=active_table, active="admin")
+#<!DOCTYPE html>
+#<html lang="fr">
+#<head>
+#    <meta charset="UTF-8">
+ #   <title>Panneau d'administration</title>
+  #  <meta name="viewport" content="width=device-width, initial-scale=1">
+   # <!-- Bootstrap CSS -->
+    #<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+#</head>
+#<body class="bg-light">
+ #   <div class="container py-5">
+  #      <div class="text-center mb-4">
+   #         <h2>🧑‍💼 Panneau d'administration</h2>
+    #        <p>Table active : <strong>{{ active_table }}</strong></p>
+     #   </div>
 
-    return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Panneau d'administration</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="text-center mb-4">
-            <h2>🧑‍💼 Panneau d'administration</h2>
-            <p>Table active : <strong>{{ active_table }}</strong></p>
-        </div>
+      #  <div class="table-responsive">
+       #     <h3>Tables existantes :</h3>
+        #    <table class="table table-bordered table-hover bg-white shadow-sm">
+         #       <thead class="table-primary">
+          #          <tr>
+           #             <th>Nom de la table</th>
+            #            <th>Actions</th>
+             #       </tr>
+              #  </thead>
+               # <tbody>
+                #    {% for table in tables %}
+                 #   <tr>
+                  #      <td>{{ table }}</td>
+                   #     <td>
+                    #        <a href="{{ url_for('admin_set_table', name=table) }}" class="btn btn-sm btn-outline-primary">Utiliser</a>
+                     #       <a href="{{ url_for('admin_view_data') }}?table={{ table }}" class="btn btn-sm btn-outline-secondary">Voir données</a>
+                      #  </td>
+                    #</tr>
+                    #{% endfor %}
+    #            </tbody>
+     #       </table>
+      #  </div>
 
-        <div class="table-responsive">
-            <h3>Tables existantes :</h3>
-            <table class="table table-bordered table-hover bg-white shadow-sm">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Nom de la table</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for table in tables %}
-                    <tr>
-                        <td>{{ table }}</td>
-                        <td>
-                            <a href="{{ url_for('admin_set_table', name=table) }}" class="btn btn-sm btn-outline-primary">Utiliser</a>
-                            <a href="{{ url_for('admin_view_data') }}?table={{ table }}" class="btn btn-sm btn-outline-secondary">Voir données</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+#        <div class="mt-4 text-center">
+ #           <a href="{{ url_for('admin_add_user') }}" class="btn btn-info mb-2">📝 Ajouter un utilisateur (via formulaire)</a><br>
+  #          <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">🔒 Déconnexion</a>
+   #     </div>
+    #</div>
 
-        <div class="mt-4 text-center">
-            <a href="{{ url_for('admin_add_user') }}" class="btn btn-info mb-2">📝 Ajouter un utilisateur (via formulaire)</a><br>
-            <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">🔒 Déconnexion</a>
-        </div>
-    </div>
+    #<!-- Bootstrap JS -->
+    #<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+#</body>
+#</html>
+#""", tables=tables, active_table=active_table)
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-""", tables=tables, active_table=active_table)
-
-    if schema_manager.load_schema(table):
-        session_manager.set_active_table(table)
-    return redirect(url_for('admin_dashboard'))
+ #   if schema_manager.load_schema(table):
+  #      session_manager.set_active_table(table)
+   # return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/admin/data')
@@ -385,59 +385,67 @@ def admin_view_data():
     data = file_manager.load_data(table)
 
     return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Données de la table {{ table }}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        <div class="container py-5">
-            <h2 class="text-center mb-4">📊 Données de la table <strong>{{ table }}</strong></h2>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>📊 Données de la table {{ table }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-            {% if data %}
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover bg-white shadow-sm">
-                    <thead class="table-primary">
-                        <tr>
-                            {% for key in data[0].keys() %}
-                                <th>{{ key }}</th>
-                            {% endfor %}
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in data %}
-                        <tr>
-                            {% for value in row.values() %}
-                                <td>{{ value }}</td>
-                            {% endfor %}
-                            <td class="actions">
-    <a href="{{ url_for('admin_edit_user', id=row['id']) }}" class="btn btn-sm btn-warning">✏️</a>
-    <a href="{{ url_for('admin_delete_user', id=row['id']) }}" class="btn btn-sm btn-danger">🗑️</a>
-</td>
-                        </tr>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}?v=1">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}?v=1">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}?v=1">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}?v=1">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}?v=1">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">📊 Données de la table <strong>{{ table }}</strong></h2>
+
+        {% if data %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle bg-white shadow-sm">
+                <thead class="table-dark text-white">
+                    <tr>
+                        {% for key in data[0].keys() %}
+                            <th class="text-center">{{ key }}</th>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-                <p class="text-center">🔍 Aucune donnée trouvée.</p>
-            {% endif %}
-
-            <div class="text-center mt-4">
-                <a href="{{ url_for('admin_add_user') }}" class="btn btn-info m-1">➕ Ajouter un utilisateur</a>
-                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary m-1">⬅️ Retour admin</a>
-                <a href="{{ url_for('admin_export_csv') }}" class="btn btn-success m-1">⬇️ Exporter en CSV</a>
-                <a href="{{ url_for('admin_import_csv') }}" class="btn btn-primary m-1">📤 Importer un CSV</a>
-            </div>
+                        <th class="text-center">⚙️ Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        {% for value in row.values() %}
+                            <td class="text-center">{{ value }}</td>
+                        {% endfor %}
+                        <td class="text-center">
+                            <a href="{{ url_for('admin_edit_user', id=row['id']) }}" class="btn btn-sm btn-warning me-1" title="Modifier">✏️</a>
+                            <a href="{{ url_for('admin_delete_user', id=row['id']) }}" class="btn btn-sm btn-danger" title="Supprimer">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-    </html>
-    """, table=table, data=data)
+        {% else %}
+            <div class="alert alert-info text-center">🔍 Aucune donnée trouvée dans la table <strong>{{ table }}</strong>.</div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin_add_user') }}" class="btn btn-success m-1">➕ Ajouter un utilisateur</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary m-1">⬅️ Retour admin</a>
+            <a href="{{ url_for('admin_export_csv') }}" class="btn btn-outline-success m-1">⬇️ Exporter CSV</a>
+            <a href="{{ url_for('admin_import_csv') }}" class="btn btn-outline-primary m-1">📤 Importer CSV</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""", table=table, data=data)
 
 
 
@@ -468,22 +476,59 @@ def admin_create_table():
             file_manager.save_data(table_name, [])
             return redirect(url_for('admin_dashboard'))
         except Exception as e:
-            return f"Erreur : {e}"
+            return f"❌ Erreur : {e}"
 
     return render_template_string("""
-        <h2>Créer une nouvelle table</h2>
-        <form method="POST">
-            Nom de la table : <input name="table"><br><br>
-            <h4>Champs :</h4>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>🧱 Créer une table</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">🧱 Créer une nouvelle table</h2>
+        <form method="POST" class="card p-4 shadow-sm bg-white">
+            <div class="mb-3">
+                <label for="table" class="form-label">📁 Nom de la table</label>
+                <input type="text" name="table" id="table" class="form-control" required>
+            </div>
+
+            <h4 class="mt-4 mb-3">🔣 Définir les champs</h4>
+
             {% for i in range(5) %}
-                Nom : <input name="field_name"><br>
-                Type (string, int, float, bool, email, password): 
-                <input name="field_type"><br><br>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nom du champ</label>
+                        <input type="text" name="field_name" class="form-control" placeholder="ex: nom">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type</label>
+                        <select name="field_type" class="form-select">
+                            <option value="string">Texte</option>
+                            <option value="int">Nombre entier</option>
+                            <option value="float">Nombre décimal</option>
+                            <option value="bool">Booléen</option>
+                            <option value="email">Email</option>
+                            <option value="password">Mot de passe</option>
+                        </select>
+                    </div>
+                </div>
             {% endfor %}
-            <input type="submit" value="Créer">
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">✅ Créer la table</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">⬅️ Retour au tableau de bord</a>
+            </div>
         </form>
-        <p><a href="{{ url_for('admin_dashboard') }}">⬅️ Retour</a></p>
-    """)
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""")
 
 
 
@@ -509,31 +554,37 @@ def admin_add_user():
         return redirect(url_for('admin_view_data'))
 
     return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Ajouter un utilisateur</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        <div class="container py-5">
-            <h2 class="mb-4">➕ Ajouter un utilisateur à <strong>{{ table }}</strong></h2>
-            <form method="POST" class="bg-white p-4 rounded shadow-sm">
-                {% for champ in schema %}
-                    <div class="mb-3">
-                        <label class="form-label">{{ champ }}</label>
-                        <input name="{{ champ }}" class="form-control">
-                    </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary w-100">Ajouter</button>
-            </form>
-            <p class="mt-3"><a href="{{ url_for('admin_dashboard') }}">⬅️ Retour</a></p>
-        </div>
-    </body>
-    </html>
-    """, table=table, schema=schema)
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>➕ Ajouter un utilisateur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">➕ Ajouter un utilisateur à <strong>{{ table }}</strong></h2>
+        
+        <form method="POST" class="card p-4 shadow-sm bg-white">
+            {% for champ in schema %}
+                <div class="mb-3">
+                    <label for="{{ champ }}" class="form-label">🔹 {{ champ }}</label>
+                    <input type="text" name="{{ champ }}" id="{{ champ }}" class="form-control" required>
+                </div>
+            {% endfor %}
+            
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-success">✅ Enregistrer</button>
+                <a href="{{ url_for('admin_view_data') }}" class="btn btn-secondary">⬅️ Retour aux données</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+""", table=table, schema=schema)
 
 
 
@@ -579,30 +630,33 @@ def admin_edit_user(id):
         return redirect(url_for('admin_view_data'))
 
     return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Modifier utilisateur</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        <div class="container py-5">
-            <h2 class="mb-4">✏️ Modifier l'utilisateur</h2>
-            <form method="POST" class="bg-white p-4 rounded shadow-sm">
-                {% for champ in schema %}
-                    <div class="mb-3">
-                        <label class="form-label">{{ champ }}</label>
-                        <input name="{{ champ }}" class="form-control" value="{{ utilisateur[champ] }}">
-                    </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
-            </form>
-            <p class="mt-3"><a href="{{ url_for('admin_view_data') }}">⬅️ Retour</a></p>
-        </div>
-    </body>
-    </html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>✏️ Modifier utilisateur</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">✏️ Modifier l'utilisateur</h2>
+        <form method="POST" class="card p-4 shadow-sm bg-white">
+            {% for champ in schema %}
+                <div class="mb-3">
+                    <label for="{{ champ }}" class="form-label">🔹 {{ champ }}</label>
+                    <input type="text" id="{{ champ }}" name="{{ champ }}" class="form-control" value="{{ utilisateur[champ] }}" required />
+                </div>
+            {% endfor %}
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                <a href="{{ url_for('admin_view_data') }}" class="btn btn-secondary">⬅️ Retour aux données</a>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
     """, utilisateur=utilisateur, schema=schema)
 
 
@@ -621,13 +675,11 @@ def admin_export_csv():
     if not data:
         return "📭 Aucune donnée à exporter."
 
-    # Création du CSV en mémoire
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=data[0].keys())
     writer.writeheader()
     writer.writerows(data)
 
-    # Envoie le CSV en pièce jointe
     return Response(
         output.getvalue(),
         mimetype='text/csv',
@@ -657,7 +709,6 @@ def admin_import_csv():
         if not file:
             return "❌ Aucun fichier envoyé."
 
-        # Lecture du CSV
         try:
             stream = io.StringIO(file.stream.read().decode("utf-8"))
             reader = csv.DictReader(stream)
@@ -666,7 +717,6 @@ def admin_import_csv():
                 validated = data_validator.validate_record(row, schema)
                 new_data.append(validated)
 
-            # Ajout à la table
             anciens = file_manager.load_data(table)
             file_manager.save_data(table, anciens + new_data)
 
@@ -675,12 +725,30 @@ def admin_import_csv():
             return f"❌ Erreur lors de l'import : {e}"
 
     return render_template_string("""
-        <h2>Importer un fichier CSV dans '{{ table }}'</h2>
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="csv_file" accept=".csv">
-            <input type="submit" value="Importer">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>📥 Importer CSV dans '{{ table }}'</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4">📥 Importer un fichier CSV dans <strong>{{ table }}</strong></h2>
+        <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
+            <div class="mb-3">
+                <input type="file" name="csv_file" accept=".csv" class="form-control" required />
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">⬆️ Importer</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">⬅️ Retour admin</a>
+            </div>
         </form>
-        <p><a href="{{ url_for('admin_dashboard') }}">⬅️ Retour admin</a></p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
     """, table=table)
 
 
@@ -718,58 +786,58 @@ def login():
         flash("❌ Identifiants incorrects.", "danger")
         return redirect(url_for("login"))
 
-    return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    {{ navbar|safe }}
+    return render_template("login.html", active="login")
+#<!DOCTYPE html>
+#<html lang="fr">
+#<head>
+ #   <meta charset="UTF-8">
+  #  <title>Connexion</title>
+   # <meta name="viewport" content="width=device-width, initial-scale=1">
+   # <!-- Bootstrap CSS -->
+   # <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+#</head>
+#<body class="bg-light">
+ #   {{ navbar|safe }}
 
-    <!-- Affichage des messages flash -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="container mt-3">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} text-center">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    #<!-- Affichage des messages flash -->
+    #{% with messages = get_flashed_messages(with_categories=true) %}
+     # {% if messages %}
+      #  <div class="container mt-3">
+       #   {% for category, message in messages %}
+        #    <div class="alert alert-{{ category }} text-center">
+         #     {{ message }}
+          #  </div>
+          #{% endfor %}
+        #</div>
+      #{% endif %}
+    #{% endwith %}
 
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
-            <h2 class="text-center mb-4">&#128272; Connexion utilisateur</h2>
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Adresse email</label>
-                    <input name="email" type="email" class="form-control" id="email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="mot_de_passe" class="form-label">Mot de passe</label>
-                    <input name="mot_de_passe" type="password" class="form-control" id="mot_de_passe" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
-            </form>
-            <p class="text-center mt-3">
-                Pas encore inscrit ?
-                <a href="{{ url_for('formulaire') }}">Créer un compte</a>
-            </p>
-        </div>
-    </div>
+    #<div class="container d-flex justify-content-center align-items-center min-vh-100">
+     #   <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
+      #      <h2 class="text-center mb-4">&#128272; Connexion utilisateur</h2>
+       #     <form method="POST">
+        #        <div class="mb-3">
+         #           <label for="email" class="form-label">Adresse email</label>
+          #          <input name="email" type="email" class="form-control" id="email" required>
+           #     </div>
+            #    <div class="mb-3">
+             #       <label for="mot_de_passe" class="form-label">Mot de passe</label>
+              #      <input name="mot_de_passe" type="password" class="form-control" id="mot_de_passe" required>
+               # </div>
+                #<button type="submit" class="btn btn-primary w-100">Se connecter</button>
+            #</form>
+            #<p class="text-center mt-3">
+             #   Pas encore inscrit ?
+              #  <a href="{{ url_for('formulaire') }}">Créer un compte</a>
+            #</p>
+        #</div>
+    #</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-""", navbar=navbar_html("login"))
+    #<!-- Bootstrap JS -->
+    #<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+#</body>
+#</html>
+#""", navbar=navbar_html("login"))
 
 
 
@@ -788,7 +856,6 @@ def mon_espace():
     if not utilisateur:
         return "⚠️ Utilisateur introuvable."
 
-    # Sécurité : Vérifier que l'email a bien été confirmé
     if not utilisateur.get("email_confirmed", False):
         flash("⚠️ Votre adresse email n’a pas été confirmée. Veuillez vérifier vos emails.", "danger")
         return redirect(url_for("login"))
@@ -806,54 +873,54 @@ def mon_espace():
         flash("✅ Budget mis à jour avec succès.", "success")
         return redirect(url_for('mon_espace'))
 
-    return render_template_string("""
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Mon espace</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    {{ navbar|safe }}
+    return render_template("mon_espace.html", utilisateur=utilisateur, active="mon_espace")
+#<!DOCTYPE html>
+#<html lang="fr">
+#<head>
+ #   <meta charset="UTF-8">
+  #  <title>Mon espace</title>
+   # <meta name="viewport" content="width=device-width, initial-scale=1">
+   # <!-- Bootstrap CSS -->
+   # <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+#</head>
+#<body class="bg-light">
+ #   {{ navbar|safe }}
+#
+ #   <!-- Flash messages -->
+  #  {% with messages = get_flashed_messages(with_categories=true) %}
+   #   {% if messages %}
+    #    <div class="container mt-3">
+     #     {% for category, message in messages %}
+      #      <div class="alert alert-{{ category }} text-center">
+       #       {{ message }}
+        #    </div>
+         # {% endfor %}
+     #   </div>
+      #{% endif %}
+   # {% endwith %}
 
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="container mt-3">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} text-center">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    #<div class="container d-flex justify-content-center align-items-center min-vh-100">
+     #   <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px;">
+      #      <h2 class="text-center mb-4">Bienvenue {{ utilisateur["prenom"] }} 👋</h2>
+       #     <p class="text-center">Budget actuel : <strong>{{ utilisateur.get("budget", "Non défini") }}</strong></p>
+        #    <form method="POST">
+         #       <div class="mb-3">
+          #          <label for="budget" class="form-label"><strong>Votre budget total :</strong></label>
+           #         <input id="budget" name="budget" type="number" step="0.01" class="form-control" required>
+            #    </div>
+             #   <button type="submit" class="btn btn-primary w-100">Enregistrer le budget</button>
+           # </form>
+            #<div class="text-center mt-3">
+             #   <a href="{{ url_for('logout') }}" class="btn btn-link text-danger">🔓 Se déconnecter</a>
+           # </div>
+        #</div>
+    #</div>
 
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px;">
-            <h2 class="text-center mb-4">Bienvenue {{ utilisateur["prenom"] }} 👋</h2>
-            <p class="text-center">Budget actuel : <strong>{{ utilisateur.get("budget", "Non défini") }}</strong></p>
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="budget" class="form-label"><strong>Votre budget total :</strong></label>
-                    <input id="budget" name="budget" type="number" step="0.01" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Enregistrer le budget</button>
-            </form>
-            <div class="text-center mt-3">
-                <a href="{{ url_for('logout') }}" class="btn btn-link text-danger">🔓 Se déconnecter</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-""", utilisateur=utilisateur, navbar=navbar_html("mon_espace"))
+    #<!-- Bootstrap JS -->
+    #<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+#</body>
+#</html>
+#""", utilisateur=utilisateur, navbar=navbar_html("mon_espace"))
 
 
 
@@ -887,53 +954,56 @@ def logout():
 
 @app.route('/accueil')
 def accueil():
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Accueil</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        {{ navbar|safe }}
-        <div class="container py-5">
-            <div class="text-center">
-                <h1>Bienvenue sur MonApp !</h1>
-                <p class="lead">Une application simple et efficace pour gérer vos données.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """, navbar=navbar_html("accueil"))
+    return render_template("accueil.html", active="accueil")
+    #<!DOCTYPE html>
+    #<html lang="fr">
+    #<head>
+     #   <meta charset="UTF-8">
+      #  <title>Accueil</title>
+       # <meta name="viewport" content="width=device-width, initial-scale=1">
+        #<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    #</head>
+    #<body class="bg-light">
+     #   {{ navbar|safe }}
+      #  <div class="container py-5">
+       #     <div class="text-center">
+        #        <h1>Bienvenue sur MonApp !</h1>
+         #       <p class="lead">Une application simple et efficace pour gérer vos données.</p>
+          #  </div>
+        #</div>
+    #</body>
+    #</html>
+    #""", navbar=navbar_html("accueil"))
 
-@app.route('/contact')
+@app.route("/contact")
 def contact():
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Nous contacter</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        {{ navbar|safe }}
-        <div class="container py-5">
-            <div class="card shadow p-4">
-                <h2 class="mb-3">Nous contacter</h2>
-                <p>Pour toute question ou suggestion, écrivez-nous à :</p>
-                <ul>
-                    <li>Email : support@monapp.fr</li>
-                    <li>Téléphone : +33 6 12 34 56 78</li>
-                </ul>
-            </div>
-        </div>
-    </body>
-    </html>
-    """, navbar=navbar_html("contact"))
+    return render_template("contact.html", active="contact")
+   # <!DOCTYPE html>
+    #<html lang="fr">
+    #<head>
+     #   <meta charset="UTF-8">
+      #  <title>Nous contacter</title>
+       # <meta name="viewport" content="width=device-width, initial-scale=1">
+       # <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    #</head>
+    #<body class="bg-light">
+     #   {{ navbar|safe }}
+      #  <div class="container py-5">
+       #     <div class="card shadow p-4">
+        #        <h2 class="mb-3">Nous contacter</h2>
+         #       <p>Pour toute question ou suggestion, écrivez-nous à :</p>
+          #      <ul>
+           #         <li>Email : support@monapp.fr</li>
+            #        <li>Téléphone : +33 6 12 34 56 78</li>
+             #   </ul>
+           # </div>
+        #</div>
+    #</body>
+    #</html>
+    #""", navbar=navbar_html("contact"))
+
+
+
 
 
 
@@ -943,49 +1013,48 @@ def contact():
 
 @app.route("/confidentialite")
 def politique_confidentialite():
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Politique de confidentialité</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        {{ navbar|safe }}
-        <div class="container py-5">
-            <h1>Politique de confidentialité</h1>
-            <p>Nous collectons vos données pour améliorer le service...</p>
-        </div>
-    </body>
-    </html>
-    """, navbar=navbar_html())
+    return render_template("confidentialite.html", active="confidentialite")
+  #  <!DOCTYPE html>
+   # <html lang="fr">
+    #<head>
+     #   <meta charset="UTF-8">
+      #  <title>Politique de confidentialité</title>
+       # <meta name="viewport" content="width=device-width, initial-scale=1">
+       # <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    #</head>
+    #<body class="bg-light">
+     #   {{ navbar|safe }}
+      #  <div class="container py-5">
+       #     <h1>Politique de confidentialité</h1>
+        #    <p>Nous collectons vos données pour améliorer le service...</p>
+       # </div>
+    #</body>
+   # </html>
+    #""", navbar=navbar_html())
 
 
 
 @app.route("/conditions")
 def conditions_utilisation():
-    return render_template_string("""
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <title>Conditions d'utilisation</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-light">
-        {{ navbar|safe }}
-        <div class="container py-5">
-            <h1>Conditions d'utilisation</h1>
-            <p>En utilisant ce site, vous acceptez de respecter les règles suivantes...</p>
-        </div>
-    </body>
-    </html>
-    """, navbar=navbar_html())
-
-
+    return render_template("conditions.html", active="conditions")
+  #  <!DOCTYPE html>
+   # <html lang="fr">
+   # <head>
+    #    <meta charset="UTF-8">
+     #   <title>Conditions d'utilisation</title>
+      #  <meta name="viewport" content="width=device-width, initial-scale=1">
+      # <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+       # <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    #</head>
+    #<body class="bg-light">
+     #   {{ navbar|safe }}
+      #  <div class="container py-5">
+       #     <h1>Conditions d'utilisation</h1>
+        #    <p>En utilisant ce site, vous acceptez de respecter les règles suivantes...</p>
+        #</div>
+    #</body>
+    #</html>
+    #""", navbar=navbar_html())
 
 
 @app.route('/admin/set/<name>')
@@ -1002,6 +1071,7 @@ cur = conn.cursor()
 tables = cur.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
 print("Tables existantes dans data.db :", tables)
 conn.close()
+
 
 
 

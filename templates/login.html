@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5" style="max-width: 420px;">
+  <h2 class="mb-4 text-center">🔐 Connexion</h2>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category=='danger' else category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" class="bg-white p-4 rounded shadow-sm">
+    <div class="mb-3">
+      <label for="email" class="form-label">📧 Adresse Email</label>
+      <input type="email" id="email" name="email" class="form-control" required autofocus>
+    </div>
+    <div class="mb-3">
+      <label for="mot_de_passe" class="form-label">🔑 Mot de passe</label>
+      <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+  </form>
+  <p class="mt-3 text-center">
+    Pas encore de compte ? <a href="{{ url_for('formulaire') }}">Inscrivez-vous ici</a>.
+  </p>
+</div>
+{% endblock %}
