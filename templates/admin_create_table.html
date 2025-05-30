@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Créer une table{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">➕ Créer une nouvelle table</h2>
+
+    <!-- Messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'danger' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="table_name" class="form-label">Nom de la table</label>
+            <input type="text" class="form-control" id="table_name" name="table_name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="fields" class="form-label">Champs (séparés par des virgules)</label>
+            <input type="text" class="form-control" id="fields" name="fields" placeholder="ex: nom, prénom, email, mot_de_passe" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Créer la table</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary ms-2">Annuler</a>
+    </form>
+</div>
+{% endblock %}

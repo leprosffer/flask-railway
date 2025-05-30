@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Données de la table{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">📄 Données de la table <span class="text-primary">{{ table_name or "Inconnue" }}</span></h2>
+
+    {% if data and data|length > 0 %}
+        <div class="table-responsive shadow-sm">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        {% for column in data[0].keys() %}
+                            <th>{{ column }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr>
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">Aucune donnée à afficher pour cette table.</div>
+    {% endif %}
+
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary mt-3">← Retour au panneau</a>
+</div>
+{% endblock %}

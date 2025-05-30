@@ -5,5 +5,9 @@
   "email": "email",
   "mot_de_passe": "password",
   "budget": "float",
-  "email_confirmed": "boolean"
+  "email_confirmed": "boolean",
+  "depenses": "list",
+  "economies": "float",
+  "historique_economies": "list",
+  "investissments":"list"
 }

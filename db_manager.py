@@ -1,56 +1,53 @@
-import sqlite3
 import os
 import json
-
-DB_PATH = "data.db"
-
-# -------------------------------
-# Connexion
-# -------------------------------
+import mysql.connector
+from urllib.parse import urlparse
 
 def connect():
-    return sqlite3.connect(DB_PATH)
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        raise Exception("La variable d'environnement DATABASE_URL n'est pas définie")
 
-# -------------------------------
-# Lecture des données
-# -------------------------------
+    url = urlparse(db_url)
+    config = {
+        "host": url.hostname,
+        "user": url.username,
+        "password": url.password,
+        "database": url.path.lstrip('/'),
+        "port": url.port or 3306
+    }
+
+    return mysql.connector.connect(**config)
 
 def load_data(table):
     table = table.strip()
     conn = connect()
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table}")
+    cur = conn.cursor(dictionary=True)
+    cur.execute(f"SELECT * FROM `{table}`")
     rows = cur.fetchall()
-    columns = [desc[0] for desc in cur.description]
     conn.close()
-    return [dict(zip(columns, row)) for row in rows]
-
-
-
-
+    return rows
 
 def add_missing_columns(table_name, required_columns):
     conn = connect()
     cur = conn.cursor()
 
-    # Récupérer les colonnes existantes
-    cur.execute(f"PRAGMA table_info({table_name})")
-    existing_columns = [row[1] for row in cur.fetchall()]
+    db_name = urlparse(os.getenv("DATABASE_URL")).path.lstrip('/')
 
-    # Ajouter les colonnes manquantes
+    cur.execute("""
+        SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s
+    """, (db_name, table_name))
+    
+    existing_columns = [row[0] for row in cur.fetchall()]
+
     for col, col_type in required_columns.items():
         if col not in existing_columns:
-            cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {col} {col_type}")
+            sql = f"ALTER TABLE `{table_name}` ADD COLUMN `{col}` {col_type}"
+            cur.execute(sql)
 
     conn.commit()
     conn.close()
-
-
-
-
-# -------------------------------
-# Écriture (remplacement complet)
-# -------------------------------
 
 def save_data(table, data):
     table = table.strip()
@@ -60,98 +57,34 @@ def save_data(table, data):
     conn = connect()
     cur = conn.cursor()
 
-    cur.execute(f"DELETE FROM {table}")  # Efface tout
+    cur.execute(f"DELETE FROM `{table}`")
 
     for record in data:
-        champs = ", ".join(record.keys())
+        champs = ", ".join(f"`{k}`" for k in record.keys())
         valeurs = tuple(record.values())
-        placeholders = ", ".join(["?"] * len(valeurs))
-        cur.execute(f"INSERT INTO {table} ({champs}) VALUES ({placeholders})", valeurs)
+        placeholders = ", ".join(["%s"] * len(valeurs))
+        cur.execute(f"INSERT INTO `{table}` ({champs}) VALUES ({placeholders})", valeurs)
 
     conn.commit()
     conn.close()
-
-# -------------------------------
-# Insertion d’un enregistrement
-# -------------------------------
 
 def insert_data(table, record):
     table = table.strip()
     conn = connect()
     cur = conn.cursor()
-    champs = ", ".join(record.keys())
-    placeholders = ", ".join(["?"] * len(record))
-    cur.execute(f"INSERT INTO {table} ({champs}) VALUES ({placeholders})", tuple(record.values()))
+    champs = ", ".join(f"`{k}`" for k in record.keys())
+    placeholders = ", ".join(["%s"] * len(record))
+    cur.execute(f"INSERT INTO `{table}` ({champs}) VALUES ({placeholders})", tuple(record.values()))
     conn.commit()
     conn.close()
-
-# -------------------------------
-# Mise à jour d’un enregistrement
-# -------------------------------
 
 def update_data(table, user_id, new_data):
     table = table.strip()
     conn = connect()
     cur = conn.cursor()
-    champs = ", ".join([f"{k}=?" for k in new_data.keys()])
+    champs = ", ".join(f"`{k}` = %s" for k in new_data.keys())
     valeurs = list(new_data.values())
     valeurs.append(user_id)
-    cur.execute(f"UPDATE {table} SET {champs} WHERE id = ?", valeurs)
+    cur.execute(f"UPDATE `{table}` SET {champs} WHERE id = %s", valeurs)
     conn.commit()
     conn.close()
-
-# -------------------------------
-# Suppression d’un utilisateur
-# -------------------------------
-
-def delete_user(table, user_id):
-    table = table.strip()
-    conn = connect()
-    cur = conn.cursor()
-    try:
-        cur.execute(f"DELETE FROM {table} WHERE id = ?", (user_id,))
-        conn.commit()
-        return True
-    except Exception as e:
-        conn.rollback()
-        print(f"Erreur lors de la suppression : {e}")
-        return False
-    finally:
-        conn.close()
-
-# -------------------------------
-# Récupération d’un utilisateur
-# -------------------------------
-
-def get_user_by_id(table, user_id):
-    table = table.strip()
-    conn = connect()
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table} WHERE id = ?", (user_id,))
-    row = cur.fetchone()
-    conn.close()
-    if row:
-        columns = [desc[0] for desc in cur.description]
-        return dict(zip(columns, row))
-    return None
-
-# -------------------------------
-# Liste des tables
-# -------------------------------
-
-def list_tables():
-    conn = connect()
-    cur = conn.cursor()
-    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
-    tables = [row[0] for row in cur.fetchall()]
-    conn.close()
-    return tables
-
-# -------------------------------
-# Schéma (stocké dans fichiers JSON)
-# -------------------------------
-
-def save_schema(table_name, schema):
-    schema_path = f"schemas/{table_name}.json"
-    with open(schema_path, "w", encoding="utf-8") as f:
-        json.dump(schema, f, indent=2, ensure_ascii=False)
